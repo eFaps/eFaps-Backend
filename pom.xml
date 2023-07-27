@@ -86,6 +86,17 @@
     <version>22.0.1</version>
 </dependency>
 
+<dependency>
+    <groupId>io.smallrye.config</groupId>
+    <artifactId>smallrye-config</artifactId>
+    <version>3.3.2</version>
+</dependency>
+<dependency>
+    <groupId>io.smallrye.config</groupId>
+    <artifactId>smallrye-config-source-yaml</artifactId>
+    <version>3.3.2</version>
+</dependency>
+
         <!-- uncomment this to get JSON support:
          <dependency>
             <groupId>org.glassfish.jersey.media</groupId>

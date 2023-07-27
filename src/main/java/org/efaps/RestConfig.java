@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.efaps.admin.program.esjp.EsjpScanner;
 import org.efaps.backend.HealthResource;
 import org.efaps.backend.InitFeature;
@@ -18,7 +19,6 @@ import org.efaps.backend.injection.DatasourceProvider;
 import org.efaps.backend.listeners.AppEventListener;
 import org.efaps.db.Context;
 import org.efaps.db.databases.AbstractDatabase;
-import org.efaps.db.databases.PostgreSQLDatabase;
 import org.efaps.jaas.AppAccessHandler;
 import org.efaps.rest.Compile;
 import org.efaps.rest.ObjectMapperResolver;
@@ -35,8 +35,6 @@ import org.glassfish.hk2.utilities.FactoryDescriptorsImpl;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.arjuna.ats.internal.jta.transaction.arjunacore.TransactionManagerImple;
 
 import jakarta.transaction.TransactionManager;
 import jakarta.ws.rs.ApplicationPath;
@@ -100,31 +98,23 @@ public class RestConfig
 
     public void inject()
     {
+        final var config = ConfigProvider.getConfig();
+
         final var factory = ServiceLocatorFactory.getInstance();
         final var locator = factory.create("eFaps-Core");
         final var dcs = locator.getService(DynamicConfigurationService.class);
         final var dynConfig = dcs.createDynamicConfiguration();
 
-        final DescriptorImpl retVal = new DescriptorImpl();
+        final DescriptorImpl descriptor1 = new DescriptorImpl();
+        descriptor1.addAdvertisedContract(AbstractDatabase.class.getName());
+        descriptor1.setImplementation(config.getValue("backend.database", String.class));
+        descriptor1.setScope("jakarta.inject.Singleton");
+        dynConfig.bind(descriptor1);
 
-        retVal.addAdvertisedContract(AbstractDatabase.class.getName());
-        retVal.setImplementation(PostgreSQLDatabase.class.getName());
-        retVal.setScope("jakarta.inject.Singleton");
-        dynConfig.bind(retVal);
-
-        final DescriptorImpl retVal2 = new DescriptorImpl();
-        retVal2.addAdvertisedContract(TransactionManager.class.getName());
-        retVal2.setImplementation(TransactionManagerImple.class.getName());
-        // retVal.setScope("org.glassfish.api.PerLookup");
-        dynConfig.bind(retVal2);
-        /**
-         * final DescriptorImpl retVal3 = new DescriptorImpl();
-         * retVal3.addAdvertisedContract(DataSource.class.getName());
-         * retVal3.setImplementation(DatasourceProvider.class.getName());
-         * retVal3.setDescriptorType(DescriptorType.PROVIDE_METHOD);
-         * retVal3.setScope("jakarta.inject.Singleton");
-         * dynConfig.bind(retVal3);
-         **/
+        final DescriptorImpl descriptor2 = new DescriptorImpl();
+        descriptor2.addAdvertisedContract(TransactionManager.class.getName());
+        descriptor2.setImplementation(config.getValue("backend.transactionManager", String.class));
+        dynConfig.bind(descriptor2);
 
         final DescriptorImpl retVal4 = new DescriptorImpl();
         retVal4.addAdvertisedContract(Factory.class.getName());
