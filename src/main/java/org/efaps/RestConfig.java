@@ -9,6 +9,7 @@ import javax.sql.DataSource;
 
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.efaps.admin.program.esjp.EsjpScanner;
+import org.efaps.admin.runlevel.RunLevel;
 import org.efaps.backend.HealthResource;
 import org.efaps.backend.InitFeature;
 import org.efaps.backend.MyBinder;
@@ -60,10 +61,21 @@ public class RestConfig
     {
         AppAccessHandler.init("backend", Collections.emptySet());
         inject();
+
+        try {
+            Context.begin();
+            RunLevel.init("webapp");
+            RunLevel.execute();
+            Context.commit();
+        } catch (final EFapsException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
         LOG.info("Scanning esjps for REST implementations");
         try {
             if (!Context.isThreadActive()) {
-                Context.begin(null, Context.Inheritance.Local);
+                //Context.begin(null, Context.Inheritance.Local);
                 registerClasses(new EsjpScanner().scan(Path.class, Provider.class));
                 registerClasses(Compile.class);
                // registerClasses(Update.class);
