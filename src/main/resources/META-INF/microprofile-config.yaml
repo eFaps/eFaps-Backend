@@ -9,3 +9,6 @@ backend:
 
 sever:
    url: http://localhost:8080
+
+keycloak:
+   configFile: keycloak.json

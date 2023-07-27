@@ -1,11 +1,14 @@
 package org.efaps.backend.filters;
 
-import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.efaps.util.cache.InfinispanCache;
 import org.infinispan.Cache;
+import org.keycloak.adapters.KeycloakDeployment;
 import org.keycloak.adapters.KeycloakDeploymentBuilder;
 import org.keycloak.adapters.rotation.AdapterTokenVerifier;
 import org.keycloak.common.VerificationException;
@@ -28,11 +31,26 @@ public class AuthenticationFilter
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthenticationFilter.class);
     private static final String CACHENAME = AuthenticationFilter.class.getName() + ".Cache";
+    private static KeycloakDeployment KEYCLOAKDEPLOYMENT;
 
     public AuthenticationFilter()
     {
+        init();
+    }
+
+    private void init()
+    {
         if (!InfinispanCache.get().exists(CACHENAME)) {
             InfinispanCache.get().initCache(CACHENAME);
+        }
+        if (KEYCLOAKDEPLOYMENT == null) {
+            final var config = ConfigProvider.getConfig();
+            final var path = config.getValue("keycloak.configFile", java.nio.file.Path.class);
+            try {
+                KEYCLOAKDEPLOYMENT = KeycloakDeploymentBuilder.build(new FileInputStream(path.toFile()));
+            } catch (final FileNotFoundException e) {
+                LOG.error("Missing keycloak configuration file", e);
+            }
         }
     }
 
@@ -43,7 +61,8 @@ public class AuthenticationFilter
         LOG.info("Starting authentication");
         final var authHeader = requestContext.getHeaderString("Authorization");
         if (authHeader == null) {
-            if (requestContext.getSecurityContext() != null && requestContext.getSecurityContext() instanceof AnonymousSecuritContext) {
+            if (requestContext.getSecurityContext() != null
+                            && requestContext.getSecurityContext() instanceof AnonymousSecuritContext) {
                 return;
             }
             abortWithUnauthorized(requestContext);
@@ -59,21 +78,8 @@ public class AuthenticationFilter
             }
             getCache().remove(token);
         }
-        LOG.info("token {}", token);
-        final var def = """
-                        {
-                          "realm": "demo",
-                          "auth-server-url": "https://sso.synercom.pe/auth/",
-                          "ssl-required": "external",
-                          "resource": "localhost-test",
-                          "public-client": true,
-                          "confidential-port": 0
-                        }""";
-        final var targetStream = new ByteArrayInputStream(def.getBytes());
-        final var deployment = KeycloakDeploymentBuilder.build(targetStream);
-
         try {
-            final var accessToken = AdapterTokenVerifier.verifyToken(token, deployment);
+            final var accessToken = AdapterTokenVerifier.verifyToken(token, KEYCLOAKDEPLOYMENT);
             getCache().put(token, accessToken, 5, TimeUnit.MINUTES);
             LOG.info("tok {}", accessToken);
             requestContext.setSecurityContext(new KeycloakSecurityContext(accessToken));
