@@ -79,7 +79,7 @@ public class RestConfig
                                 AppEventListener.class,
                                 AuthenticationFilter.class, KeycloakSecurityContext.class, ContextFilter.class);
 
-                // Context.begin(null, Context.Inheritance.Local);
+                Context.begin();
                 registerClasses(new EsjpScanner().scan(Path.class, Provider.class));
                 registerClasses(Compile.class);
                 // registerClasses(Update.class);
@@ -102,6 +102,7 @@ public class RestConfig
                         logClasses("Provider classes found:", providerClasses);
                     }
                 }
+                Context.commit();
             }
         } catch (final EFapsException e) {
             // TODO Auto-generated catch block

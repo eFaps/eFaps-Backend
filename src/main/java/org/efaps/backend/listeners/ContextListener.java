@@ -7,15 +7,15 @@ import org.glassfish.jersey.server.monitoring.RequestEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ContextListener implements RequestEventListener
+public class ContextListener
+    implements RequestEventListener
 {
-    private static final Logger LOG = LoggerFactory.getLogger(ContextListener.class);
 
+    private static final Logger LOG = LoggerFactory.getLogger(ContextListener.class);
 
     @Override
     public void onEvent(final RequestEvent event)
     {
-        LOG.info("event {}", event.getType());
         switch (event.getType()) {
             case FINISHED:
                 LOG.info("Context stop");
@@ -24,8 +24,7 @@ public class ContextListener implements RequestEventListener
                         Context.commit();
                     }
                 } catch (final EFapsException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOG.error("FINISHED threw", e);
                 }
                 break;
             case ON_EXCEPTION:
@@ -34,14 +33,11 @@ public class ContextListener implements RequestEventListener
                         Context.rollback();
                     }
                 } catch (final EFapsException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOG.error("ON_EXCEPTION threw", e);
                 }
                 break;
             default:
                 break;
         }
-
     }
-
 }
