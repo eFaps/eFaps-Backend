@@ -29,7 +29,8 @@ public class AuthenticationFilter
     private static final Logger LOG = LoggerFactory.getLogger(AuthenticationFilter.class);
     private static final String CACHENAME = AuthenticationFilter.class.getName() + ".Cache";
 
-    public AuthenticationFilter() {
+    public AuthenticationFilter()
+    {
         if (!InfinispanCache.get().exists(CACHENAME)) {
             InfinispanCache.get().initCache(CACHENAME);
         }
@@ -42,6 +43,9 @@ public class AuthenticationFilter
         LOG.info("Starting authentication");
         final var authHeader = requestContext.getHeaderString("Authorization");
         if (authHeader == null) {
+            if (requestContext.getSecurityContext() != null && requestContext.getSecurityContext() instanceof AnonymousSecuritContext) {
+                return;
+            }
             abortWithUnauthorized(requestContext);
         }
         final var token = authHeader.replaceFirst("Bearer ", "");
@@ -57,14 +61,14 @@ public class AuthenticationFilter
         }
         LOG.info("token {}", token);
         final var def = """
-            {
-              "realm": "demo",
-              "auth-server-url": "https://sso.synercom.pe/auth/",
-              "ssl-required": "external",
-              "resource": "localhost-test",
-              "public-client": true,
-              "confidential-port": 0
-            }""";
+                        {
+                          "realm": "demo",
+                          "auth-server-url": "https://sso.synercom.pe/auth/",
+                          "ssl-required": "external",
+                          "resource": "localhost-test",
+                          "public-client": true,
+                          "confidential-port": 0
+                        }""";
         final var targetStream = new ByteArrayInputStream(def.getBytes());
         final var deployment = KeycloakDeploymentBuilder.build(targetStream);
 

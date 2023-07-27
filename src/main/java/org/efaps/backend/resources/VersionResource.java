@@ -1,6 +1,4 @@
-package org.efaps.backend;
-
-import java.time.LocalDateTime;
+package org.efaps.backend.resources;
 
 import org.efaps.util.EFapsException;
 import org.slf4j.Logger;
@@ -11,13 +9,14 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.core.Context;
 
-@Path("health")
-public class HealthResource
+@Path("version")
+public class VersionResource
 {
     private static final Logger LOG = LoggerFactory.getLogger(HealthResource.class);
+
     @GET
     public String health(@Context ContainerRequestContext context) throws EFapsException {
         LOG.info("context: {}", context.getSecurityContext());
-        return "More or less " + LocalDateTime.now();
+        return "1";
     }
 }

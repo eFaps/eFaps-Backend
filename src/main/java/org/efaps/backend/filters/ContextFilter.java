@@ -18,19 +18,23 @@ import jakarta.ws.rs.ext.Provider;
 public class ContextFilter
     implements ContainerRequestFilter
 {
+
     private static final Logger LOG = LoggerFactory.getLogger(ContextFilter.class);
+
     @Override
     public void filter(final ContainerRequestContext requestContext)
         throws IOException
     {
-        LOG.info("Context starts here");
-       final var sc = (KeycloakSecurityContext) requestContext.getSecurityContext();
-       final var userUUID = sc.getUserPrincipal().getName();
-       try {
-        Context.begin(userUUID);
-    } catch (final EFapsException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-    }
+        if (requestContext.getSecurityContext() instanceof KeycloakSecurityContext) {
+            LOG.info("Context starts here");
+            final var sc = (KeycloakSecurityContext) requestContext.getSecurityContext();
+            final var userUUID = sc.getUserPrincipal().getName();
+            try {
+                Context.begin(userUUID);
+            } catch (final EFapsException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
     }
 }

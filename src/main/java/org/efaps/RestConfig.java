@@ -10,14 +10,15 @@ import javax.sql.DataSource;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.efaps.admin.program.esjp.EsjpScanner;
 import org.efaps.admin.runlevel.RunLevel;
-import org.efaps.backend.HealthResource;
-import org.efaps.backend.InitFeature;
 import org.efaps.backend.MyBinder;
+import org.efaps.backend.filters.AnonymousFilter;
 import org.efaps.backend.filters.AuthenticationFilter;
 import org.efaps.backend.filters.ContextFilter;
 import org.efaps.backend.filters.KeycloakSecurityContext;
 import org.efaps.backend.injection.DatasourceProvider;
 import org.efaps.backend.listeners.AppEventListener;
+import org.efaps.backend.resources.HealthResource;
+import org.efaps.backend.resources.VersionResource;
 import org.efaps.db.Context;
 import org.efaps.db.databases.AbstractDatabase;
 import org.efaps.jaas.AppAccessHandler;
@@ -53,8 +54,6 @@ public class RestConfig
     {
         register(new MyBinder());
         init();
-        registerClasses(HealthResource.class, InitFeature.class);
-
     }
 
     public void init()
@@ -75,16 +74,19 @@ public class RestConfig
         LOG.info("Scanning esjps for REST implementations");
         try {
             if (!Context.isThreadActive()) {
-                //Context.begin(null, Context.Inheritance.Local);
+                // backend Resources
+                registerClasses(AnonymousFilter.class, HealthResource.class, VersionResource.class,
+                                AppEventListener.class,
+                                AuthenticationFilter.class, KeycloakSecurityContext.class, ContextFilter.class);
+
+                // Context.begin(null, Context.Inheritance.Local);
                 registerClasses(new EsjpScanner().scan(Path.class, Provider.class));
                 registerClasses(Compile.class);
-               // registerClasses(Update.class);
+                // registerClasses(Update.class);
                 registerClasses(RestEQLInvoker.class);
                 registerClasses(RestContext.class);
                 registerClasses(Search.class);
-                registerClasses(ObjectMapperResolver.class,
-                                AppEventListener.class,
-                                AuthenticationFilter.class, KeycloakSecurityContext.class, ContextFilter.class);
+                registerClasses(ObjectMapperResolver.class);
                 if (LOG.isInfoEnabled() && !getClasses().isEmpty()) {
                     final Set<Class<?>> rootResourceClasses = get(Path.class);
                     if (rootResourceClasses.isEmpty()) {
@@ -160,9 +162,9 @@ public class RestConfig
         final StringBuilder b = new StringBuilder();
         b.append(_text);
         _classes.stream()
-            .map(Class::getName)
-            .sorted()
-            .forEach(clazzName -> b.append('\n').append("  ").append(clazzName));
+                        .map(Class::getName)
+                        .sorted()
+                        .forEach(clazzName -> b.append('\n').append("  ").append(clazzName));
         LOG.info(b.toString());
     }
 }
