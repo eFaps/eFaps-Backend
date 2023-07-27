@@ -2,10 +2,14 @@ package org.efaps.backend.filters;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
+import org.efaps.util.cache.InfinispanCache;
+import org.infinispan.Cache;
 import org.keycloak.adapters.KeycloakDeploymentBuilder;
 import org.keycloak.adapters.rotation.AdapterTokenVerifier;
 import org.keycloak.common.VerificationException;
+import org.keycloak.representations.AccessToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +27,13 @@ public class AuthenticationFilter
 {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthenticationFilter.class);
+    private static final String CACHENAME = AuthenticationFilter.class.getName() + ".Cache";
+
+    public AuthenticationFilter() {
+        if (!InfinispanCache.get().exists(CACHENAME)) {
+            InfinispanCache.get().initCache(CACHENAME);
+        }
+    }
 
     @Override
     public void filter(final ContainerRequestContext requestContext)
@@ -34,6 +45,16 @@ public class AuthenticationFilter
             abortWithUnauthorized(requestContext);
         }
         final var token = authHeader.replaceFirst("Bearer ", "");
+
+        if (getCache().containsKey(token)) {
+            LOG.info("found him {}", token);
+            final var accessToken = getCache().get(token);
+            if (accessToken.isActive()) {
+                requestContext.setSecurityContext(new KeycloakSecurityContext(accessToken));
+                return;
+            }
+            getCache().remove(token);
+        }
         LOG.info("token {}", token);
         final var def = """
             {
@@ -48,10 +69,10 @@ public class AuthenticationFilter
         final var deployment = KeycloakDeploymentBuilder.build(targetStream);
 
         try {
-            final var tok = AdapterTokenVerifier.verifyToken(token, deployment);
-            LOG.info("tok {}", tok);
-            requestContext.setSecurityContext(new KeycloakSecurityContext(tok));
-
+            final var accessToken = AdapterTokenVerifier.verifyToken(token, deployment);
+            getCache().put(token, accessToken, 5, TimeUnit.MINUTES);
+            LOG.info("tok {}", accessToken);
+            requestContext.setSecurityContext(new KeycloakSecurityContext(accessToken));
         } catch (final VerificationException e) {
             LOG.warn("Authentication rejected", e);
             abortWithUnauthorized(requestContext);
@@ -59,10 +80,13 @@ public class AuthenticationFilter
 
     }
 
-    private void abortWithUnauthorized(ContainerRequestContext requestContext)
+    private void abortWithUnauthorized(final ContainerRequestContext requestContext)
     {
-        requestContext.abortWith(
-                        Response.status(Response.Status.UNAUTHORIZED)
-                                        .build());
+        requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
+    }
+
+    private Cache<String, AccessToken> getCache()
+    {
+        return InfinispanCache.get().getIgnReCache(CACHENAME);
     }
 }
