@@ -1,6 +1,7 @@
 package org.efaps;
 
 import java.lang.annotation.Annotation;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,11 +12,14 @@ import org.efaps.backend.HealthResource;
 import org.efaps.backend.InitFeature;
 import org.efaps.backend.MyBinder;
 import org.efaps.backend.filters.AuthenticationFilter;
+import org.efaps.backend.filters.ContextFilter;
+import org.efaps.backend.filters.KeycloakSecurityContext;
 import org.efaps.backend.injection.DatasourceProvider;
 import org.efaps.backend.listeners.AppEventListener;
 import org.efaps.db.Context;
 import org.efaps.db.databases.AbstractDatabase;
 import org.efaps.db.databases.PostgreSQLDatabase;
+import org.efaps.jaas.AppAccessHandler;
 import org.efaps.rest.Compile;
 import org.efaps.rest.ObjectMapperResolver;
 import org.efaps.rest.RestContext;
@@ -56,6 +60,7 @@ public class RestConfig
 
     public void init()
     {
+        AppAccessHandler.init("backend", Collections.emptySet());
         inject();
         LOG.info("Scanning esjps for REST implementations");
         try {
@@ -67,7 +72,9 @@ public class RestConfig
                 registerClasses(RestEQLInvoker.class);
                 registerClasses(RestContext.class);
                 registerClasses(Search.class);
-                registerClasses(ObjectMapperResolver.class, AppEventListener.class, AuthenticationFilter.class);
+                registerClasses(ObjectMapperResolver.class,
+                                AppEventListener.class,
+                                AuthenticationFilter.class, KeycloakSecurityContext.class, ContextFilter.class);
                 if (LOG.isInfoEnabled() && !getClasses().isEmpty()) {
                     final Set<Class<?>> rootResourceClasses = get(Path.class);
                     if (rootResourceClasses.isEmpty()) {

@@ -6,7 +6,6 @@ import java.io.IOException;
 import org.keycloak.adapters.KeycloakDeploymentBuilder;
 import org.keycloak.adapters.rotation.AdapterTokenVerifier;
 import org.keycloak.common.VerificationException;
-import org.keycloak.representations.AccessToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,13 +47,14 @@ public class AuthenticationFilter
         final var targetStream = new ByteArrayInputStream(def.getBytes());
         final var deployment = KeycloakDeploymentBuilder.build(targetStream);
 
-        AccessToken tok;
         try {
-            tok = AdapterTokenVerifier.verifyToken(token, deployment);
+            final var tok = AdapterTokenVerifier.verifyToken(token, deployment);
             LOG.info("tok {}", tok);
+            requestContext.setSecurityContext(new KeycloakSecurityContext(tok));
+
         } catch (final VerificationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.warn("Authentication rejected", e);
+            abortWithUnauthorized(requestContext);
         }
 
     }
