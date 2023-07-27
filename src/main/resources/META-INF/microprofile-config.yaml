@@ -6,3 +6,6 @@ backend:
       url: jdbc:postgresql://127.0.0.1:5432/lite
       user: efaps
       password: efaps
+
+sever:
+   url: http://localhost:8080
