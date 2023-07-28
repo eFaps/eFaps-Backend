@@ -10,6 +10,7 @@ import javax.sql.DataSource;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.efaps.admin.program.esjp.EsjpScanner;
 import org.efaps.admin.runlevel.RunLevel;
+import org.efaps.backend.InitFeature;
 import org.efaps.backend.MyBinder;
 import org.efaps.backend.filters.AnonymousFilter;
 import org.efaps.backend.filters.AuthenticationFilter;
@@ -77,7 +78,7 @@ public class RestConfig
             if (!Context.isThreadActive()) {
                 // backend Resources
                 registerClasses(AnonymousFilter.class, CorsFilter.class, HealthResource.class, VersionResource.class,
-                                AppEventListener.class,
+                                AppEventListener.class, InitFeature.class,
                                 AuthenticationFilter.class, KeycloakSecurityContext.class, ContextFilter.class);
 
                 Context.begin();
