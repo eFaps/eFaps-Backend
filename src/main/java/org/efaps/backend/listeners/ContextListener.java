@@ -18,9 +18,9 @@ public class ContextListener
     {
         switch (event.getType()) {
             case FINISHED:
-                LOG.info("Context stop");
                 try {
                     if (Context.isThreadActive()) {
+                        LOG.info("Context stop");
                         Context.commit();
                     }
                 } catch (final EFapsException e) {

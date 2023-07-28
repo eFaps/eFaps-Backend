@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.efaps.admin.user.Company;
 import org.efaps.db.Context;
+import org.efaps.db.Context.Inheritance;
 import org.efaps.util.EFapsException;
 import org.efaps.util.UUIDUtil;
 import org.slf4j.Logger;
@@ -36,7 +37,7 @@ public class ContextFilter
             final var sc = (KeycloakSecurityContext) requestContext.getSecurityContext();
             final var userUUID = sc.getUserPrincipal().getName();
             try {
-                Context.begin(userUUID);
+                Context.begin(userUUID, Inheritance.Local);
                 if (Context.getThreadContext().getCompany() == null) {
                     final var companyId = Context.getThreadContext().getPerson().getCompanies().stream().sorted()
                                     .findFirst().orElseThrow();

@@ -41,13 +41,17 @@
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-grizzly2-http</artifactId>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.glassfish.jersey.inject</groupId>
             <artifactId>jersey-hk2</artifactId>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-json-binding</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-multipart</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -74,32 +78,26 @@
             <artifactId>postgresql</artifactId>
             <version>42.5.0</version>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.jboss.narayana.jta</groupId>
             <artifactId>narayana-jta</artifactId>
             <version>7.0.0.Final</version>
-         </dependency>
-<dependency>
-    <groupId>com.auth0</groupId>
-    <artifactId>java-jwt</artifactId>
-    <version>4.4.0</version>
-</dependency>
-<dependency>
-    <groupId>org.keycloak</groupId>
-    <artifactId>keycloak-adapter-core</artifactId>
-    <version>22.0.1</version>
-</dependency>
-
-<dependency>
-    <groupId>io.smallrye.config</groupId>
-    <artifactId>smallrye-config</artifactId>
-    <version>3.3.2</version>
-</dependency>
-<dependency>
-    <groupId>io.smallrye.config</groupId>
-    <artifactId>smallrye-config-source-yaml</artifactId>
-    <version>3.3.2</version>
-</dependency>
+        </dependency>
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-adapter-core</artifactId>
+            <version>22.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.smallrye.config</groupId>
+            <artifactId>smallrye-config</artifactId>
+            <version>3.3.2</version>
+        </dependency>
+        <dependency>
+            <groupId>io.smallrye.config</groupId>
+            <artifactId>smallrye-config-source-yaml</artifactId>
+            <version>3.3.2</version>
+        </dependency>
 
 
         <dependency>

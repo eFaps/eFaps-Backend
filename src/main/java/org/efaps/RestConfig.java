@@ -14,6 +14,7 @@ import org.efaps.backend.MyBinder;
 import org.efaps.backend.filters.AnonymousFilter;
 import org.efaps.backend.filters.AuthenticationFilter;
 import org.efaps.backend.filters.ContextFilter;
+import org.efaps.backend.filters.CorsFilter;
 import org.efaps.backend.filters.KeycloakSecurityContext;
 import org.efaps.backend.injection.DatasourceProvider;
 import org.efaps.backend.listeners.AppEventListener;
@@ -75,7 +76,7 @@ public class RestConfig
         try {
             if (!Context.isThreadActive()) {
                 // backend Resources
-                registerClasses(AnonymousFilter.class, HealthResource.class, VersionResource.class,
+                registerClasses(AnonymousFilter.class, CorsFilter.class, HealthResource.class, VersionResource.class,
                                 AppEventListener.class,
                                 AuthenticationFilter.class, KeycloakSecurityContext.class, ContextFilter.class);
 

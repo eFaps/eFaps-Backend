@@ -66,6 +66,7 @@ public class AuthenticationFilter
                 return;
             }
             abortWithUnauthorized(requestContext);
+            return;
         }
         final var token = authHeader.replaceFirst("Bearer ", "");
 
