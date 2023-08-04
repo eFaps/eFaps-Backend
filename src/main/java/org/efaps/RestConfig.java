@@ -5,25 +5,20 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.sql.DataSource;
-
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.efaps.admin.program.esjp.EsjpScanner;
 import org.efaps.admin.runlevel.RunLevel;
 import org.efaps.backend.InitFeature;
-import org.efaps.backend.MyBinder;
 import org.efaps.backend.filters.AnonymousFilter;
 import org.efaps.backend.filters.AuthenticationFilter;
 import org.efaps.backend.filters.ContextFilter;
 import org.efaps.backend.filters.CorsFilter;
 import org.efaps.backend.filters.KeycloakSecurityContext;
-import org.efaps.backend.injection.DatasourceProvider;
+import org.efaps.backend.injection.CoreBinder;
 import org.efaps.backend.listeners.AppEventListener;
 import org.efaps.backend.resources.HealthResource;
 import org.efaps.backend.resources.VersionResource;
 import org.efaps.db.Context;
 import org.efaps.db.Context.Inheritance;
-import org.efaps.db.databases.AbstractDatabase;
 import org.efaps.jaas.AppAccessHandler;
 import org.efaps.rest.Compile;
 import org.efaps.rest.ObjectMapperResolver;
@@ -31,17 +26,12 @@ import org.efaps.rest.RestContext;
 import org.efaps.rest.RestEQLInvoker;
 import org.efaps.rest.Search;
 import org.efaps.util.EFapsException;
-import org.glassfish.hk2.api.DescriptorType;
 import org.glassfish.hk2.api.DynamicConfigurationService;
-import org.glassfish.hk2.api.Factory;
 import org.glassfish.hk2.api.ServiceLocatorFactory;
-import org.glassfish.hk2.utilities.DescriptorImpl;
-import org.glassfish.hk2.utilities.FactoryDescriptorsImpl;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.transaction.TransactionManager;
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.ext.Provider;
@@ -55,7 +45,6 @@ public class RestConfig
 
     public RestConfig()
     {
-        register(new MyBinder());
         init();
     }
 
@@ -115,36 +104,12 @@ public class RestConfig
 
     public void inject()
     {
-        final var config = ConfigProvider.getConfig();
-
         final var factory = ServiceLocatorFactory.getInstance();
         final var locator = factory.create("eFaps-Core");
         final var dcs = locator.getService(DynamicConfigurationService.class);
         final var dynConfig = dcs.createDynamicConfiguration();
 
-        final DescriptorImpl descriptor1 = new DescriptorImpl();
-        descriptor1.addAdvertisedContract(AbstractDatabase.class.getName());
-        descriptor1.setImplementation(config.getValue("backend.database", String.class));
-        descriptor1.setScope("jakarta.inject.Singleton");
-        dynConfig.bind(descriptor1);
-
-        final DescriptorImpl descriptor2 = new DescriptorImpl();
-        descriptor2.addAdvertisedContract(TransactionManager.class.getName());
-        descriptor2.setImplementation(config.getValue("backend.transactionManager", String.class));
-        dynConfig.bind(descriptor2);
-
-        final DescriptorImpl retVal4 = new DescriptorImpl();
-        retVal4.addAdvertisedContract(Factory.class.getName());
-        retVal4.setImplementation(DatasourceProvider.class.getName());
-
-        final DescriptorImpl retVal5 = new DescriptorImpl();
-        retVal5.addAdvertisedContract(DataSource.class.getName());
-        retVal5.setImplementation(DatasourceProvider.class.getName());
-        retVal5.setDescriptorType(DescriptorType.PROVIDE_METHOD);
-        final var fac = new FactoryDescriptorsImpl(retVal4, retVal5);
-
-        dynConfig.bind(fac);
-
+        new CoreBinder().bind(dynConfig);
         dynConfig.commit();
     }
 

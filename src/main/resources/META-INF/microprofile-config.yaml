@@ -1,7 +1,9 @@
 
 backend:
    database:  org.efaps.db.databases.PostgreSQLDatabase
-   transactionManager: com.arjuna.ats.internal.jta.transaction.arjunacore.TransactionManagerImple
+   transaction:
+      manager: com.arjuna.ats.internal.jta.transaction.arjunacore.TransactionManagerImple
+      timeout: 600
    datasource:
       url: jdbc:postgresql://127.0.0.1:5432/lite
       user: efaps
