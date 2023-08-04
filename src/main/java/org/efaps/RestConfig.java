@@ -22,6 +22,7 @@ import org.efaps.backend.listeners.AppEventListener;
 import org.efaps.backend.resources.HealthResource;
 import org.efaps.backend.resources.VersionResource;
 import org.efaps.db.Context;
+import org.efaps.db.Context.Inheritance;
 import org.efaps.db.databases.AbstractDatabase;
 import org.efaps.jaas.AppAccessHandler;
 import org.efaps.rest.Compile;
@@ -64,13 +65,12 @@ public class RestConfig
         inject();
 
         try {
-            Context.begin();
+            Context.begin(null, Inheritance.Local);
             RunLevel.init("webapp");
             RunLevel.execute();
             Context.commit();
         } catch (final EFapsException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.error("Catched", e);
         }
 
         LOG.info("Scanning esjps for REST implementations");
