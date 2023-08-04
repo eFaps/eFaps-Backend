@@ -9,6 +9,10 @@ backend:
       user: efaps
       password: efaps
 
+core:
+   quartz:
+      active: true
+
 sever:
    url: http://localhost:8080
 

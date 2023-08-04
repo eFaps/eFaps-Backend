@@ -85,15 +85,12 @@ public class RestConfig
                 registerClasses(AnonymousFilter.class, CorsFilter.class, HealthResource.class, VersionResource.class,
                                 AppEventListener.class,
                                 AuthenticationFilter.class, KeycloakSecurityContext.class, ContextFilter.class);
+                // third party resources
 
                 Context.begin();
                 registerClasses(new EsjpScanner().scan(Path.class, Provider.class));
-                registerClasses(Compile.class);
-                // registerClasses(Update.class);
-                registerClasses(RestEQLInvoker.class);
-                registerClasses(RestContext.class);
-                registerClasses(Search.class);
-                registerClasses(ObjectMapperResolver.class);
+                //core Resources
+                registerClasses(Compile.class, RestEQLInvoker.class, RestContext.class,Search.class, ObjectMapperResolver.class);
                 if (LOG.isInfoEnabled() && !getClasses().isEmpty()) {
                     final Set<Class<?>> rootResourceClasses = get(Path.class);
                     if (rootResourceClasses.isEmpty()) {
