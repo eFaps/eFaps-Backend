@@ -12,7 +12,6 @@
 
     <artifactId>efaps-backend</artifactId>
     <packaging>jar</packaging>
-    <version>1.0-SNAPSHOT</version>
     <name>eFaps Backend</name>
 
     <properties>
