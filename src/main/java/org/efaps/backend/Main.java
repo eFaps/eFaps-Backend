@@ -41,7 +41,7 @@ public class Main
 
         final var config = ConfigProvider.getConfig();
         final URI baseUri = config.getValue("sever.url", URI.class);
-
+        LOG.info("Starting server at: {}", baseUri);
         try {
             Context.begin(null, Inheritance.Local);
             final var server = GrizzlyHttpServerFactory.createHttpServer(baseUri, restConfig);
