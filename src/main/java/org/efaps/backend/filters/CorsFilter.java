@@ -18,6 +18,9 @@ package org.efaps.backend.filters;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ContainerResponseContext;
@@ -31,33 +34,36 @@ import jakarta.ws.rs.ext.Provider;
 public class CorsFilter
     implements ContainerRequestFilter, ContainerResponseFilter
 {
+    private static final Logger LOG = LoggerFactory.getLogger(CorsFilter.class);
 
     @Override
-    public void filter(ContainerRequestContext requestContext)
+    public void filter(final ContainerRequestContext requestContext)
         throws IOException
     {
+        LOG.info("Checking if Preflight: ");
         if (isPreflightRequest(requestContext)) {
+            LOG.info("- is Preflight");
             requestContext.abortWith(Response.ok().build());
             return;
         }
-
     }
 
-    private static boolean isPreflightRequest(ContainerRequestContext requestContext)
+    private static boolean isPreflightRequest(final ContainerRequestContext requestContext)
     {
         return requestContext.getHeaderString("Origin") != null
                         && requestContext.getMethod().equalsIgnoreCase("OPTIONS");
     }
 
     @Override
-    public void filter(ContainerRequestContext requestContext,
-                       ContainerResponseContext responseContext)
+    public void filter(final ContainerRequestContext requestContext,
+                       final ContainerResponseContext responseContext)
         throws IOException
     {
+        LOG.info("Checking if Preflight ");
         if (requestContext.getHeaderString("Origin") == null) {
             return;
         }
-
+        LOG.info("Adding headers: ");
         if (isPreflightRequest(requestContext)) {
             responseContext.getHeaders().add("Access-Control-Allow-Credentials", "true");
             responseContext.getHeaders().add("Access-Control-Allow-Methods",
@@ -66,5 +72,6 @@ public class CorsFilter
                             "X-Requested-With,x-context-company, Authorization, Accept-Version,Content-Type");
         }
         responseContext.getHeaders().add("Access-Control-Allow-Origin", "*");
+        LOG.info("Adding headers: {}",  responseContext.getHeaders());
     }
 }
