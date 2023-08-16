@@ -33,7 +33,6 @@ import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.ext.Provider;
-
 @Provider
 @Priority(Priorities.AUTHENTICATION + 10)
 public class ContextFilter
@@ -77,7 +76,7 @@ public class ContextFilter
                     }
                     if (company == null) {
                         LOG.warn("Received Header to set company {} but could not find the company", companyStr);
-                    } else {
+                    } else if (Context.getThreadContext().getPerson().getCompanies().contains(company.getId())) {
                         final Company currentCompany = Context.getThreadContext().getCompany();
                         if (currentCompany.getId() == company.getId()) {
                             LOG.debug("Context company unchanged");
@@ -85,6 +84,8 @@ public class ContextFilter
                             Context.getThreadContext().setCompany(company);
                             LOG.debug("Set context company to {}", company);
                         }
+                    } else {
+                        throw new RuntimeException("invalid Company");
                     }
                 }
             } catch (final EFapsException e) {
