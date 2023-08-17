@@ -24,6 +24,8 @@ import java.util.Set;
 
 import org.efaps.admin.program.esjp.EsjpScanner;
 import org.efaps.admin.runlevel.RunLevel;
+import org.efaps.backend.errors.GeneralExceptionMapper;
+import org.efaps.backend.errors.InvalidSchemaExceptionMapper;
 import org.efaps.backend.filters.AnonymousFilter;
 import org.efaps.backend.filters.AuthenticationFilter;
 import org.efaps.backend.filters.ContextFilter;
@@ -31,6 +33,7 @@ import org.efaps.backend.filters.CorsFilter;
 import org.efaps.backend.filters.KeycloakSecurityContext;
 import org.efaps.backend.injection.CoreBinder;
 import org.efaps.backend.listeners.AppEventListener;
+import org.efaps.backend.resources.GraphQLResource;
 import org.efaps.backend.resources.HealthResource;
 import org.efaps.backend.resources.VersionResource;
 import org.efaps.db.Context;
@@ -82,15 +85,17 @@ public class RestConfig
         try {
             if (!Context.isThreadActive()) {
                 // backend Resources
-                registerClasses(AnonymousFilter.class, CorsFilter.class, HealthResource.class, VersionResource.class,
-                                AppEventListener.class,
-                                AuthenticationFilter.class, KeycloakSecurityContext.class, ContextFilter.class);
-                // third party resources
+                registerClasses(AppEventListener.class, CorsFilter.class, AnonymousFilter.class,
+                                AuthenticationFilter.class,
+                                ContextFilter.class, KeycloakSecurityContext.class, GeneralExceptionMapper.class,
+                                InvalidSchemaExceptionMapper.class,
+                                HealthResource.class, VersionResource.class, GraphQLResource.class);
 
                 Context.begin();
                 registerClasses(new EsjpScanner().scan(Path.class, Provider.class));
-                //core Resources
-                registerClasses(Compile.class, RestEQLInvoker.class, RestContext.class,Search.class, ObjectMapperResolver.class);
+                // core Resources
+                registerClasses(Compile.class, RestEQLInvoker.class, RestContext.class, Search.class,
+                                ObjectMapperResolver.class);
                 if (LOG.isInfoEnabled() && !getClasses().isEmpty()) {
                     final Set<Class<?>> rootResourceClasses = get(Path.class);
                     if (rootResourceClasses.isEmpty()) {
