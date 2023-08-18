@@ -40,9 +40,9 @@ public class CorsFilter
     public void filter(final ContainerRequestContext requestContext)
         throws IOException
     {
-        LOG.info("Checking if Preflight: ");
+        LOG.debug("Checking if Preflight: ");
         if (isPreflightRequest(requestContext)) {
-            LOG.info("- is Preflight");
+            LOG.debug("- is Preflight");
             requestContext.abortWith(Response.ok().build());
             return;
         }
@@ -59,11 +59,10 @@ public class CorsFilter
                        final ContainerResponseContext responseContext)
         throws IOException
     {
-        LOG.info("Checking if Preflight ");
+        LOG.debug("Checking if Preflight ");
         if (requestContext.getHeaderString("Origin") == null) {
             return;
         }
-        LOG.info("Adding headers: ");
         if (isPreflightRequest(requestContext)) {
             responseContext.getHeaders().add("Access-Control-Allow-Credentials", "true");
             responseContext.getHeaders().add("Access-Control-Allow-Methods",
@@ -72,6 +71,6 @@ public class CorsFilter
                             "X-Requested-With,x-context-company, Authorization, Accept-Version,Content-Type");
         }
         responseContext.getHeaders().add("Access-Control-Allow-Origin", "*");
-        LOG.info("Adding headers: {}",  responseContext.getHeaders());
+        LOG.debug("Adding headers: {}",  responseContext.getHeaders());
     }
 }
