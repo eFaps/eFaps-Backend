@@ -30,7 +30,6 @@ import org.efaps.backend.filters.AnonymousFilter;
 import org.efaps.backend.filters.AuthenticationFilter;
 import org.efaps.backend.filters.ContextFilter;
 import org.efaps.backend.filters.CorsFilter;
-import org.efaps.backend.filters.KeycloakSecurityContext;
 import org.efaps.backend.injection.CoreBinder;
 import org.efaps.backend.listeners.AppEventListener;
 import org.efaps.backend.resources.GraphQLResource;
@@ -87,7 +86,7 @@ public class RestConfig
                 // backend Resources
                 registerClasses(AppEventListener.class, CorsFilter.class, AnonymousFilter.class,
                                 AuthenticationFilter.class,
-                                ContextFilter.class, KeycloakSecurityContext.class, GeneralExceptionMapper.class,
+                                ContextFilter.class, GeneralExceptionMapper.class,
                                 InvalidSchemaExceptionMapper.class,
                                 HealthResource.class, VersionResource.class, GraphQLResource.class);
 
