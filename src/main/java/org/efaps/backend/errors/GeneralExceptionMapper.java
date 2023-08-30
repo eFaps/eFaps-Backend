@@ -28,15 +28,15 @@ import jakarta.ws.rs.ext.Provider;
 
 @Provider
 public class GeneralExceptionMapper
-    implements ExceptionMapper<Exception>
+    implements ExceptionMapper<Throwable>
 {
 
     private static final Logger LOG = LoggerFactory.getLogger(GeneralExceptionMapper.class);
 
     @Override
-    public Response toResponse(final Exception exception)
+    public Response toResponse(final Throwable throwable)
     {
-        LOG.error("Error 500 for: {}", exception);
+        LOG.error("Error 500", throwable);
         return Response.serverError().entity(ErrorDto.builder().withDateTime(OffsetDateTime.now())
                         .withMessage("Check logs").build()).build();
     }

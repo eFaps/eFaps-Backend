@@ -37,7 +37,7 @@ public class InvalidSchemaExceptionMapper
     @Override
     public Response toResponse(final InvalidSchemaException exception)
     {
-        LOG.error("Error 500 for: {}", exception);
+        LOG.error("Error 500", exception);
         return Response.serverError().entity(ErrorDto.builder().withDateTime(OffsetDateTime.now())
                         .withMessage(exception.getMessage()).build()).build();
     }
