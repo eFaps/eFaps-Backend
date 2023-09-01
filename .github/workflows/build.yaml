@@ -32,8 +32,6 @@ jobs:
       - name: Run Tests
         run: mvn test -s mySettings.xml -B
       - name: Deploy
-        run: |
-           rm target/*.exec.jar
-           mvn deploy -DskipTests -s mySettings.xml
+        run: mvn deploy -P no-exec -DskipTests -s mySettings.xml
 
 
