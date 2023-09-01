@@ -22,6 +22,7 @@ import org.efaps.backend.dto.ErrorDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
@@ -36,6 +37,11 @@ public class GeneralExceptionMapper
     @Override
     public Response toResponse(final Throwable throwable)
     {
+        if (throwable instanceof WebApplicationException) {
+            if (((WebApplicationException) throwable).getResponse() != null) {
+                return ((WebApplicationException) throwable).getResponse();
+            }
+        }
         LOG.error("Error 500", throwable);
         return Response.serverError().entity(ErrorDto.builder().withDateTime(OffsetDateTime.now())
                         .withMessage("Check logs").build()).build();
