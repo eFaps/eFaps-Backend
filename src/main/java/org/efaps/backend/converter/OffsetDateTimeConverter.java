@@ -19,7 +19,7 @@ package org.efaps.backend.converter;
 
 import java.time.OffsetDateTime;
 
-import javax.ws.rs.ext.ParamConverter;
+import jakarta.ws.rs.ext.ParamConverter;
 
 public class OffsetDateTimeConverter
     implements ParamConverter<OffsetDateTime>

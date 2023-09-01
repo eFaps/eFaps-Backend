@@ -18,7 +18,7 @@ package org.efaps.backend.converter;
 
 import java.time.LocalDate;
 
-import javax.ws.rs.ext.ParamConverter;
+import jakarta.ws.rs.ext.ParamConverter;
 
 public class LocalDateConverter
     implements ParamConverter<LocalDate>
