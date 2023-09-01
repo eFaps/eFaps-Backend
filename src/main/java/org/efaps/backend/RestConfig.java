@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.efaps.admin.program.esjp.EsjpScanner;
 import org.efaps.admin.runlevel.RunLevel;
+import org.efaps.backend.converter.ConverterProvider;
 import org.efaps.backend.errors.GeneralExceptionMapper;
 import org.efaps.backend.errors.InvalidSchemaExceptionMapper;
 import org.efaps.backend.filters.AnonymousFilter;
@@ -87,7 +88,7 @@ public class RestConfig
                 registerClasses(AppEventListener.class, CorsFilter.class, AnonymousFilter.class,
                                 AuthenticationFilter.class,
                                 ContextFilter.class, GeneralExceptionMapper.class,
-                                InvalidSchemaExceptionMapper.class,
+                                InvalidSchemaExceptionMapper.class, ConverterProvider.class,
                                 HealthResource.class, VersionResource.class, GraphQLResource.class);
 
                 Context.begin();
