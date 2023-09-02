@@ -46,7 +46,7 @@ public class CheckoutResource
         checkout.execute(output);
         final ResponseBuilder response = Response.ok(file);
         response.header("Content-Disposition","attachment; filename=\""+ checkout.getFileName() + "\"");
-        //response.header("Content-Length", checkout.);
+        response.header("Content-Length", checkout.getFileLength());
         return response.build();
     }
 }

@@ -48,7 +48,7 @@ public class ContextFilter
         throws IOException
     {
         if (requestContext.getSecurityContext() instanceof KeycloakSecurityContext) {
-            LOG.info("Context starts here");
+            LOG.debug("Context starts here");
             final var sc = (KeycloakSecurityContext) requestContext.getSecurityContext();
             final var userUUID = sc.getUserPrincipal().getName();
             try {

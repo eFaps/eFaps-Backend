@@ -74,7 +74,7 @@ public class AuthenticationFilter
     public void filter(final ContainerRequestContext requestContext)
         throws IOException
     {
-        LOG.info("Starting authentication");
+        LOG.debug("Starting authentication");
         final var authHeader = requestContext.getHeaderString("Authorization");
         if (authHeader == null) {
             if (requestContext.getSecurityContext() != null
@@ -87,7 +87,7 @@ public class AuthenticationFilter
         final var token = authHeader.replaceFirst("Bearer ", "");
 
         if (getCache().containsKey(token)) {
-            LOG.info("found him {}", token);
+            LOG.debug("found him {}", token);
             final var accessToken = getCache().get(token);
             if (accessToken.isActive()) {
                 requestContext.setSecurityContext(new KeycloakSecurityContext(accessToken));
