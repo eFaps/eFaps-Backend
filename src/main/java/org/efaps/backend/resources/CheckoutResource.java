@@ -36,8 +36,8 @@ import jakarta.ws.rs.core.Response.ResponseBuilder;
 public class CheckoutResource
 {
     @GET
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public Response checkout(@QueryParam("offset") final String oid) throws IOException, EFapsException {
+    @Produces({ MediaType.APPLICATION_OCTET_STREAM, MediaType.APPLICATION_JSON })
+    public Response checkout(@QueryParam("oid") final String oid) throws IOException, EFapsException {
         final Instance instance = Instance.get(oid);
         final Checkout checkout = new Checkout(instance);
 
