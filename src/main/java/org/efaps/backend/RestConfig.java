@@ -33,6 +33,7 @@ import org.efaps.backend.filters.ContextFilter;
 import org.efaps.backend.filters.CorsFilter;
 import org.efaps.backend.injection.CoreBinder;
 import org.efaps.backend.listeners.AppEventListener;
+import org.efaps.backend.resources.CheckoutResource;
 import org.efaps.backend.resources.GraphQLResource;
 import org.efaps.backend.resources.HealthResource;
 import org.efaps.backend.resources.VersionResource;
@@ -89,7 +90,8 @@ public class RestConfig
                                 AuthenticationFilter.class,
                                 ContextFilter.class, GeneralExceptionMapper.class,
                                 InvalidSchemaExceptionMapper.class, ConverterProvider.class,
-                                HealthResource.class, VersionResource.class, GraphQLResource.class);
+                                HealthResource.class, VersionResource.class, GraphQLResource.class,
+                                CheckoutResource.class);
 
                 Context.begin();
                 registerClasses(new EsjpScanner().scan(Path.class, Provider.class));
