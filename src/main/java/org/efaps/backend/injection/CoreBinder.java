@@ -16,6 +16,7 @@
  */
 package org.efaps.backend.injection;
 
+import javax.jcr.Repository;
 import javax.sql.DataSource;
 
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -48,7 +49,7 @@ public class CoreBinder
                             .named("transactionManagerTimeOut");
 
             bindFactory(DatasourceProvider.class).to(DataSource.class);
-
+            bindFactory(JCRRepositoryProvider.class).to(Repository.class);
         } catch (final ClassNotFoundException e) {
             LOG.error("Catched", e);
         }
