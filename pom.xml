@@ -15,7 +15,7 @@
     <name>eFaps Backend</name>
 
     <properties>
-        <jersey.version>3.1.2</jersey.version>
+        <jersey.version>3.1.3</jersey.version>
     </properties>
 
     <dependencyManagement>
@@ -40,6 +40,12 @@
             <groupId>org.efaps</groupId>
             <artifactId>efaps-graphql</artifactId>
             <version>17.0.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.efaps</groupId>
+                    <artifactId>efaps-kernel</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>jakarta.ws.rs</groupId>
@@ -49,6 +55,10 @@
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
