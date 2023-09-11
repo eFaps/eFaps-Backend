@@ -13,7 +13,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Path("qraphql")
+@Path("graphql")
 public class GraphQLResource
 {
 
