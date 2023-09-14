@@ -83,22 +83,22 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>2.0.4</version>
+            <version>2.0.9</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
-            <version>2.0.4</version>
+            <version>2.0.9</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
-            <version>1.4.4</version>
+            <version>1.4.11</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.4.4</version>
+            <version>1.4.11</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.narayana.jta</groupId>
@@ -108,17 +108,17 @@
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-adapter-core</artifactId>
-            <version>22.0.1</version>
+            <version>22.0.3</version>
         </dependency>
         <dependency>
             <groupId>io.smallrye.config</groupId>
             <artifactId>smallrye-config</artifactId>
-            <version>3.3.2</version>
+            <version>3.3.4</version>
         </dependency>
         <dependency>
             <groupId>io.smallrye.config</groupId>
             <artifactId>smallrye-config-source-yaml</artifactId>
-            <version>3.3.2</version>
+            <version>3.3.4</version>
         </dependency>
         <!-- be able to show images -->
         <dependency>
