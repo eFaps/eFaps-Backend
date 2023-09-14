@@ -87,7 +87,7 @@ public class AuthenticationFilter
         final var token = authHeader.replaceFirst("Bearer ", "");
 
         if (getCache().containsKey(token)) {
-            LOG.debug("found him {}", token);
+            LOG.debug("retrieved token from Cache {}", token);
             final var accessToken = getCache().get(token);
             if (accessToken.isActive()) {
                 requestContext.setSecurityContext(new KeycloakSecurityContext(accessToken));
@@ -98,13 +98,12 @@ public class AuthenticationFilter
         try {
             final var accessToken = AdapterTokenVerifier.verifyToken(token, KEYCLOAKDEPLOYMENT);
             getCache().put(token, accessToken, 5, TimeUnit.MINUTES);
-            LOG.info("tok {}", accessToken);
+            LOG.debug("added token to Cache {}", accessToken);
             requestContext.setSecurityContext(new KeycloakSecurityContext(accessToken));
         } catch (final VerificationException e) {
             LOG.warn("Authentication rejected", e);
             abortWithUnauthorized(requestContext);
         }
-
     }
 
     private void abortWithUnauthorized(final ContainerRequestContext requestContext)
