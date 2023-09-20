@@ -31,14 +31,14 @@ import jakarta.ws.rs.ext.Provider;
 @Anonymous
 @Provider
 @Priority(Priorities.AUTHENTICATION - 10)
-public class AnonymousFilter  implements ContainerRequestFilter
+public class AnonymousFilter implements ContainerRequestFilter
 {
     private static final Logger LOG = LoggerFactory.getLogger(AnonymousFilter.class);
     @Override
-    public void filter(ContainerRequestContext requestContext)
+    public void filter(final ContainerRequestContext requestContext)
         throws IOException
     {
-        LOG.info("Anonymous request");
+        LOG.info("Anonymous request: {}", requestContext.getUriInfo().getRequestUri() );
         requestContext.setSecurityContext(new AnonymousSecuritContext());
     }
 }

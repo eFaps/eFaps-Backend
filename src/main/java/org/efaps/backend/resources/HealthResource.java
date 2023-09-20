@@ -36,7 +36,6 @@ public class HealthResource
 
     @GET
     public String health(@Context ContainerRequestContext context) throws EFapsException {
-        LOG.info("context: {}", context.getSecurityContext());
         return "More or less " + LocalDateTime.now();
     }
 }
