@@ -38,7 +38,7 @@ public class AnonymousFilter implements ContainerRequestFilter
     public void filter(final ContainerRequestContext requestContext)
         throws IOException
     {
-        LOG.info("Anonymous request: {}", requestContext.getUriInfo().getRequestUri() );
+        LOG.debug("Anonymous request: {}", requestContext);
         requestContext.setSecurityContext(new AnonymousSecuritContext());
     }
 }

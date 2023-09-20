@@ -36,6 +36,7 @@ public class HealthResource
 
     @GET
     public String health(@Context ContainerRequestContext context) throws EFapsException {
+        LOG.info("Healthcheck from: {}", context.getUriInfo().getRequestUri() );
         return "More or less " + LocalDateTime.now();
     }
 }
