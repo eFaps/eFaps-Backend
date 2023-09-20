@@ -72,6 +72,7 @@ public class RestConfig
     public void init(final Config config)
     {
         final var appKey = config.getOptionalValue("backend.appkey", String.class).orElse("backend");
+        LOG.info("Initializing AppAccessHandler with: '{}'", appKey);
         AppAccessHandler.init(appKey, Collections.emptySet());
         inject();
 
