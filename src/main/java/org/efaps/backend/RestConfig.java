@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.microprofile.config.Config;
 import org.efaps.admin.program.esjp.EsjpScanner;
 import org.efaps.admin.runlevel.RunLevel;
 import org.efaps.backend.converter.ConverterProvider;
@@ -63,14 +64,15 @@ public class RestConfig
 
     private static final Logger LOG = LoggerFactory.getLogger(RestConfig.class);
 
-    public RestConfig()
+    public RestConfig(final Config config)
     {
-        init();
+        init(config);
     }
 
-    public void init()
+    public void init(final Config config)
     {
-        AppAccessHandler.init("backend", Collections.emptySet());
+        final var appKey = config.getOptionalValue("backend.appkey", String.class).orElse("backend");
+        AppAccessHandler.init(appKey, Collections.emptySet());
         inject();
 
         try {
@@ -116,10 +118,8 @@ public class RestConfig
                 Context.commit();
             }
         } catch (final EFapsException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.error("Catched", e);
         }
-        // new EsjpScanner().scan(Path.class, Provider.class)
     }
 
     public void inject()

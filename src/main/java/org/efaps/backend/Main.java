@@ -37,9 +37,10 @@ public class Main
     public static void main(String[] args)
         throws InterruptedException, IOException
     {
-        final ResourceConfig restConfig = new RestConfig();
-
         final var config = ConfigProvider.getConfig();
+        final ResourceConfig restConfig = new RestConfig(config);
+
+
         final URI baseUri = config.getValue("sever.url", URI.class);
         LOG.info("Starting server at: {}", baseUri);
         try {
