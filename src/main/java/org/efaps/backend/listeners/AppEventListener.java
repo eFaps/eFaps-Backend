@@ -16,6 +16,7 @@
  */
 package org.efaps.backend.listeners;
 
+import org.efaps.eql.EQL;
 import org.glassfish.jersey.server.monitoring.ApplicationEvent;
 import org.glassfish.jersey.server.monitoring.ApplicationEventListener;
 import org.glassfish.jersey.server.monitoring.RequestEvent;
@@ -26,9 +27,11 @@ public class AppEventListener
 {
 
     @Override
-    public void onEvent(ApplicationEvent event)
+    public void onEvent(final ApplicationEvent event)
     {
-        // Nothing todo here
+        if (ApplicationEvent.Type.INITIALIZATION_FINISHED.equals(event.getType())) {
+            EQL.builder();
+        }
     }
 
     @Override
