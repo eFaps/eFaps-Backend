@@ -27,12 +27,14 @@ import org.efaps.util.EFapsException;
 import org.efaps.util.UUIDUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.ext.Provider;
+
 @Provider
 @Priority(Priorities.AUTHENTICATION + 10)
 public class ContextFilter
@@ -90,6 +92,14 @@ public class ContextFilter
                 }
             } catch (final EFapsException e) {
                 LOG.error("Something went wrong while setting the company", e);
+            }
+            try {
+                final var company = Context.getThreadContext().getCompany();
+                if (company != null) {
+                    MDC.put("company",  String.format("'%s' (%s)", company.getUUID(), company.getName()));
+                }
+            } catch (EFapsException | IllegalArgumentException e) {
+                LOG.error("Something went wrong while setting the companyin the Logger Context", e);
             }
         }
     }
