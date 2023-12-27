@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import org.apache.tika.Tika;
 import org.efaps.db.Checkout;
 import org.efaps.db.Instance;
 import org.efaps.util.EFapsException;
@@ -45,6 +46,9 @@ public class CheckoutResource
         final var output = new  FileOutputStream(file);
         checkout.execute(output);
         final ResponseBuilder response = Response.ok(file);
+        final Tika tika = new Tika();
+        final String mimeType = tika.detect(file);
+        response.header("Content-Type", mimeType);
         response.header("Content-Disposition","attachment; filename=\""+ checkout.getFileName() + "\"");
         response.header("Content-Length", checkout.getFileLength());
         return response.build();
