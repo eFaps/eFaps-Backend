@@ -154,7 +154,7 @@
             <version>2.9.1</version>
         </dependency>
 
-<!--temo  -->
+<!--temp
 
         <dependency>
             <groupId>javax.ws.rs</groupId>
@@ -182,7 +182,7 @@
             <artifactId>promotions</artifactId>
             <version>${efaps.app.dependencies}</version>
         </dependency>
-
+  -->
     </dependencies>
 
     <build>
