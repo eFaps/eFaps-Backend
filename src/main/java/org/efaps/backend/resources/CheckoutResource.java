@@ -31,24 +31,31 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.Response.Status;
 
 @Path("checkout")
 public class CheckoutResource
 {
+
     @GET
     @Produces({ MediaType.APPLICATION_OCTET_STREAM, MediaType.APPLICATION_JSON })
-    public Response checkout(@QueryParam("oid") final String oid) throws IOException, EFapsException {
+    public Response checkout(@QueryParam("oid") final String oid)
+        throws IOException, EFapsException
+    {
         final Instance instance = Instance.get(oid);
         final Checkout checkout = new Checkout(instance);
-
         final var file = File.createTempFile("Checkout", "");
-        final var output = new  FileOutputStream(file);
-        checkout.execute(output);
+        final var output = new FileOutputStream(file);
+        try {
+            checkout.execute(output);
+        } catch (final EFapsException e) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
         final ResponseBuilder response = Response.ok(file);
         final Tika tika = new Tika();
         final String mimeType = tika.detect(file);
         response.header("Content-Type", mimeType);
-        response.header("Content-Disposition","attachment; filename=\""+ checkout.getFileName() + "\"");
+        response.header("Content-Disposition", "attachment; filename=\"" + checkout.getFileName() + "\"");
         response.header("Content-Length", checkout.getFileLength());
         return response.build();
     }
