@@ -27,10 +27,13 @@ import jakarta.ws.rs.core.Context;
 @Path("version")
 public class VersionResource
 {
-    private static final Logger LOG = LoggerFactory.getLogger(HealthResource.class);
+
+    private static final Logger LOG = LoggerFactory.getLogger(VersionResource.class);
 
     @GET
-    public String health(@Context ContainerRequestContext context) throws EFapsException {
+    public String version(@Context ContainerRequestContext context)
+        throws EFapsException
+    {
         LOG.info("context: {}", context.getSecurityContext());
         return "1";
     }
