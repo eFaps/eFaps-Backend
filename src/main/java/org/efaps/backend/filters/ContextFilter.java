@@ -53,7 +53,7 @@ public class ContextFilter
             final var sc = (KeycloakSecurityContext) requestContext.getSecurityContext();
             final var userUUID = sc.getUserPrincipal().getName();
             try {
-                Context.begin(userUUID, Inheritance.Local);
+                Context.begin(userUUID, Inheritance.Inheritable);
                 if (Context.getThreadContext().getCompany() == null) {
                     final var companyId = Context.getThreadContext().getPerson().getCompanies().stream().sorted()
                                     .findFirst().orElseThrow();
