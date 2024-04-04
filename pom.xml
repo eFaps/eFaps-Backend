@@ -102,11 +102,18 @@
             <groupId>org.glassfish.jersey.ext.microprofile</groupId>
             <artifactId>jersey-mp-config</artifactId>
         </dependency>
+        <!-- be able to read/parse xml responses -->
          <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-xml</artifactId>
             <version>${jackson.version}</version>
         </dependency>
+         <dependency>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-xml-provider</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
