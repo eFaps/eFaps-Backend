@@ -54,6 +54,7 @@ public class CheckoutResource
         final ResponseBuilder response = Response.ok(file);
         final Tika tika = new Tika();
         final String mimeType = tika.detect(file);
+        response.header("Access-Control-Expose-Headers", "*");
         response.header("Content-Type", mimeType);
         response.header("Content-Disposition", "attachment; filename=\"" + checkout.getFileName() + "\"");
         response.header("Content-Length", checkout.getFileLength());
