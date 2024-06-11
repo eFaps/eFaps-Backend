@@ -199,11 +199,7 @@
             <artifactId>promotions</artifactId>
             <version>${efaps.app.dependencies}</version>
         </dependency>
-        <dependency>
-        <groupId>pe.synercom.mapfre</groupId>
-    <artifactId>install</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-        </dependency>
+  -->
     </dependencies>
 
     <build>
