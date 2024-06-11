@@ -38,14 +38,14 @@ public class Main
         final var config = ConfigProvider.getConfig();
         final ResourceConfig restConfig = new RestConfig(config);
 
-
         final URI baseUri = config.getValue("sever.url", URI.class);
         LOG.info("Starting server at: {}", baseUri);
         try {
             Context.begin(null, Inheritance.Local);
-            final var server = GrizzlyHttpServerFactory.createHttpServer(baseUri, restConfig);
+            final var server = GrizzlyHttpServerFactory.createHttpServer(baseUri, restConfig, false);
+            server.getServerConfiguration().setName("eFaps-Backend");
             Context.rollback();
-            server.start();
+           server.start();
         } catch (final EFapsException e) {
             LOG.error("Catched", e);
         }

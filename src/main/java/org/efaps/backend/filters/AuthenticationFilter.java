@@ -55,9 +55,8 @@ public class AuthenticationFilter
 
     private void init()
     {
-        if (!InfinispanCache.get().exists(CACHENAME)) {
-            InfinispanCache.get().initCache(CACHENAME);
-        }
+        InfinispanCache.get().initCache(CACHENAME);
+
         if (KEYCLOAKDEPLOYMENT == null) {
             final var config = ConfigProvider.getConfig();
             final var path = config.getValue("keycloak.configFile", java.nio.file.Path.class);
@@ -112,6 +111,6 @@ public class AuthenticationFilter
 
     private Cache<String, AccessToken> getCache()
     {
-        return InfinispanCache.get().getIgnReCache(CACHENAME);
+        return InfinispanCache.get().getCache(CACHENAME);
     }
 }
