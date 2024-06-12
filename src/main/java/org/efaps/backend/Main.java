@@ -26,6 +26,7 @@ import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 public class Main
 {
@@ -35,6 +36,8 @@ public class Main
     public static void main(String[] args)
         throws InterruptedException, IOException
     {
+        SLF4JBridgeHandler.install();
+
         final var config = ConfigProvider.getConfig();
         final ResourceConfig restConfig = new RestConfig(config);
 
