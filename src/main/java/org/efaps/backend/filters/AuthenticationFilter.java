@@ -15,24 +15,35 @@
  */
 package org.efaps.backend.filters;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.security.interfaces.RSAPublicKey;
+import java.text.ParseException;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.efaps.util.cache.InfinispanCache;
-import org.infinispan.Cache;
-import org.keycloak.adapters.KeycloakDeployment;
-import org.keycloak.adapters.KeycloakDeploymentBuilder;
-import org.keycloak.adapters.rotation.AdapterTokenVerifier;
-import org.keycloak.common.VerificationException;
-import org.keycloak.representations.AccessToken;
+import org.glassfish.jersey.jackson.JacksonFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.jwk.source.JWKSourceBuilder;
+import com.nimbusds.jose.proc.JWSAlgorithmFamilyJWSKeySelector;
+import com.nimbusds.jose.proc.SecurityContext;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import com.nimbusds.jwt.proc.BadJWTException;
+import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
+
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.Priorities;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.core.Response;
@@ -46,7 +57,8 @@ public class AuthenticationFilter
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthenticationFilter.class);
     private static final String CACHENAME = AuthenticationFilter.class.getName() + ".Cache";
-    private static KeycloakDeployment KEYCLOAKDEPLOYMENT;
+    private JWKSource<SecurityContext> jwkSource;
+    private String oidcClient;
 
     public AuthenticationFilter()
     {
@@ -57,14 +69,25 @@ public class AuthenticationFilter
     {
         InfinispanCache.get().initCache(CACHENAME);
 
-        if (KEYCLOAKDEPLOYMENT == null) {
-            final var config = ConfigProvider.getConfig();
-            final var path = config.getValue("keycloak.configFile", java.nio.file.Path.class);
-            try {
-                KEYCLOAKDEPLOYMENT = KeycloakDeploymentBuilder.build(new FileInputStream(path.toFile()));
-            } catch (final FileNotFoundException e) {
-                LOG.error("Missing keycloak configuration file", e);
-            }
+        final var config = ConfigProvider.getConfig();
+
+        final var endpointURI = config.getValue("oidc.configEndpoint", URI.class);
+        this.oidcClient = config.getValue("oidc.client", String.class);
+        LOG.info("Loading oidc from: {}", endpointURI);
+
+        final Client client = ClientBuilder.newClient()
+                        .register(JacksonFeature.class);
+        final var openidConfiguration = client.target(endpointURI).request().buildGet()
+                        .invoke(OpenidConfigurationDto.class);
+        LOG.info("Using: {}", openidConfiguration);
+
+        try {
+            final var url = new URL(openidConfiguration.getJwksUri());
+            this.jwkSource = JWKSourceBuilder.create(url)
+                            .cache(true)
+                            .build();
+        } catch (final MalformedURLException e) {
+            LOG.error("Could not parse jwksUri", e);
         }
     }
 
@@ -83,22 +106,32 @@ public class AuthenticationFilter
             return;
         }
         final var token = authHeader.replaceFirst("Bearer ", "");
-
-        if (getCache().containsKey(token)) {
-            LOG.debug("retrieved token from Cache {}", token);
-            final var accessToken = getCache().get(token);
-            if (accessToken.isActive()) {
-                requestContext.setSecurityContext(new KeycloakSecurityContext(accessToken));
-                return;
-            }
-            getCache().remove(token);
-        }
         try {
-            final var accessToken = AdapterTokenVerifier.verifyToken(token, KEYCLOAKDEPLOYMENT);
-            getCache().put(token, accessToken, 5, TimeUnit.MINUTES);
-            LOG.debug("added token to Cache {}", accessToken);
-            requestContext.setSecurityContext(new KeycloakSecurityContext(accessToken));
-        } catch (final VerificationException e) {
+            final var jwt = SignedJWT.parse(token);
+            final var selector = JWSAlgorithmFamilyJWSKeySelector.fromJWKSource(jwkSource);
+            final var keys = selector.selectJWSKeys(jwt.getHeader(), null);
+            if (keys.isEmpty()) {
+                LOG.warn("Authentication rejected due to invliad JWSKEy");
+                abortWithUnauthorized(requestContext);
+            } else {
+                final var key = keys.get(0);
+                final var verifier = new RSASSAVerifier((RSAPublicKey) key);
+                if (jwt.verify(verifier)) {
+                    final var exactMatchClaims = new JWTClaimsSet.Builder().claim("azp", oidcClient).build();
+
+                    final var claimsVerifier = new DefaultJWTClaimsVerifier<>(exactMatchClaims, null);
+                    claimsVerifier.verify(jwt.getJWTClaimsSet(), null);
+                    if (StringUtils.isNotEmpty(jwt.getJWTClaimsSet().getSubject())) {
+                        requestContext.setSecurityContext(
+                                        new OidcSecurityContext(jwt.getJWTClaimsSet().getSubject()));
+                    } else {
+                        LOG.warn("Authentication rejected due to missing subject for token: {}", token);
+                        requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
+                    }
+
+                }
+            }
+        } catch (final ParseException | JOSEException | BadJWTException e) {
             LOG.warn("Authentication rejected", e);
             abortWithUnauthorized(requestContext);
         }
@@ -107,10 +140,5 @@ public class AuthenticationFilter
     private void abortWithUnauthorized(final ContainerRequestContext requestContext)
     {
         requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
-    }
-
-    private Cache<String, AccessToken> getCache()
-    {
-        return InfinispanCache.get().getCache(CACHENAME);
     }
 }

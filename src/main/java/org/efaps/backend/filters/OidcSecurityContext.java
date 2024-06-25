@@ -17,25 +17,23 @@ package org.efaps.backend.filters;
 
 import java.security.Principal;
 
-import org.keycloak.representations.AccessToken;
-
 import jakarta.ws.rs.core.SecurityContext;
 
-public class KeycloakSecurityContext
+public class OidcSecurityContext
     implements SecurityContext
 {
 
-    private final AccessToken token;
+    private final String subject;
 
-    protected KeycloakSecurityContext(final AccessToken token)
+    public OidcSecurityContext(String subject)
     {
-        this.token = token;
+        this.subject = subject;
     }
 
     @Override
     public Principal getUserPrincipal()
     {
-        return () -> token.getSubject();
+        return () -> subject;
     }
 
     @Override
@@ -47,7 +45,7 @@ public class KeycloakSecurityContext
     @Override
     public boolean isSecure()
     {
-        return true;
+        return false;
     }
 
     @Override

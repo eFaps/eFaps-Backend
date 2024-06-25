@@ -48,9 +48,9 @@ public class ContextFilter
     public void filter(final ContainerRequestContext requestContext)
         throws IOException
     {
-        if (requestContext.getSecurityContext() instanceof KeycloakSecurityContext) {
+        if (requestContext.getSecurityContext() instanceof OidcSecurityContext) {
             LOG.debug("Context starts here");
-            final var sc = (KeycloakSecurityContext) requestContext.getSecurityContext();
+            final var sc = requestContext.getSecurityContext();
             final var userUUID = sc.getUserPrincipal().getName();
             try {
                 Context.begin(userUUID, Inheritance.Inheritable);

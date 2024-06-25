@@ -150,9 +150,9 @@
             <version>7.0.1.Final</version>
         </dependency>
         <dependency>
-            <groupId>org.keycloak</groupId>
-            <artifactId>keycloak-adapter-core</artifactId>
-            <version>23.0.5</version>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>nimbus-jose-jwt</artifactId>
+            <version>9.40</version>
         </dependency>
         <dependency>
             <groupId>io.smallrye.config</groupId>
@@ -209,8 +209,12 @@
             <artifactId>efaps-pos-api</artifactId>
             <version>3.0.0-SNAPSHOT</version>
         </dependency>
- -->
-
+        <dependency>
+            <groupId>pe.synercom.bizlinks</groupId>
+            <artifactId>bizlinks-synerpos-be</artifactId>
+            <version>0.7.0</version>
+        </dependency>
+        -->
     </dependencies>
 
     <build>
