@@ -37,8 +37,6 @@ import com.nimbusds.jose.proc.JWSAlgorithmFamilyJWSKeySelector;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.jwt.proc.BadJWTException;
-import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.Priorities;
@@ -58,7 +56,7 @@ public class AuthenticationFilter
     private static final Logger LOG = LoggerFactory.getLogger(AuthenticationFilter.class);
     private static final String CACHENAME = AuthenticationFilter.class.getName() + ".Cache";
     private JWKSource<SecurityContext> jwkSource;
-    private String oidcClient;
+    private String oidcAudience;
 
     public AuthenticationFilter()
     {
@@ -72,7 +70,7 @@ public class AuthenticationFilter
         final var config = ConfigProvider.getConfig();
 
         final var endpointURI = config.getValue("oidc.configEndpoint", URI.class);
-        this.oidcClient = config.getValue("oidc.client", String.class);
+        this.oidcAudience = config.getValue("oidc.audience", String.class);
         LOG.info("Loading oidc from: {}", endpointURI);
 
         final Client client = ClientBuilder.newClient()
@@ -116,25 +114,39 @@ public class AuthenticationFilter
             } else {
                 final var key = keys.get(0);
                 final var verifier = new RSASSAVerifier((RSAPublicKey) key);
-                if (jwt.verify(verifier)) {
-                    final var exactMatchClaims = new JWTClaimsSet.Builder().claim("azp", oidcClient).build();
-
-                    final var claimsVerifier = new DefaultJWTClaimsVerifier<>(exactMatchClaims, null);
-                    claimsVerifier.verify(jwt.getJWTClaimsSet(), null);
-                    if (StringUtils.isNotEmpty(jwt.getJWTClaimsSet().getSubject())) {
-                        requestContext.setSecurityContext(
-                                        new OidcSecurityContext(jwt.getJWTClaimsSet().getSubject()));
-                    } else {
-                        LOG.warn("Authentication rejected due to missing subject for token: {}", token);
-                        requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
-                    }
-
+                if (jwt.verify(verifier) && verifyClaims(jwt.getJWTClaimsSet())) {
+                    requestContext.setSecurityContext(
+                                    new OidcSecurityContext(jwt.getJWTClaimsSet().getSubject()));
+                } else {
+                    LOG.warn("Authentication rejected due to token: {}", token);
+                    abortWithUnauthorized(requestContext);
                 }
             }
-        } catch (final ParseException | JOSEException | BadJWTException e) {
+        } catch (final ParseException | JOSEException e) {
             LOG.warn("Authentication rejected", e);
             abortWithUnauthorized(requestContext);
         }
+    }
+
+    private boolean verifyClaims(final JWTClaimsSet jwtClaimsSet)
+        throws ParseException
+    {
+        LOG.debug("Verifying Subject claim");
+        if (StringUtils.isEmpty(jwtClaimsSet.getSubject())) {
+            LOG.warn("Authentication rejected due to missing subject: {}", jwtClaimsSet);
+            return false;
+        }
+        LOG.debug("Verifying azp claim");
+        if (StringUtils.isNotEmpty(jwtClaimsSet.getStringClaim("azp"))
+                        && jwtClaimsSet.getStringClaim("azp").equals(oidcAudience)) {
+            return true;
+        }
+        LOG.debug("Verifying audience claim");
+        if (jwtClaimsSet.getAudience().contains(oidcAudience)) {
+            return true;
+        }
+        LOG.warn("Claims verification failed");
+        return false;
     }
 
     private void abortWithUnauthorized(final ContainerRequestContext requestContext)
