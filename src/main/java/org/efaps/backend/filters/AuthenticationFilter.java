@@ -24,7 +24,6 @@ import java.text.ParseException;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.microprofile.config.ConfigProvider;
-import org.efaps.util.cache.InfinispanCache;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +43,7 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
 
@@ -54,7 +54,6 @@ public class AuthenticationFilter
 {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthenticationFilter.class);
-    private static final String CACHENAME = AuthenticationFilter.class.getName() + ".Cache";
     private JWKSource<SecurityContext> jwkSource;
     private String oidcAudience;
 
@@ -65,8 +64,6 @@ public class AuthenticationFilter
 
     private void init()
     {
-        InfinispanCache.get().initCache(CACHENAME);
-
         final var config = ConfigProvider.getConfig();
 
         final var endpointURI = config.getValue("oidc.configEndpoint", URI.class);
@@ -94,7 +91,7 @@ public class AuthenticationFilter
         throws IOException
     {
         LOG.debug("Starting authentication");
-        final var authHeader = requestContext.getHeaderString("Authorization");
+        final var authHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
         if (authHeader == null) {
             if (requestContext.getSecurityContext() != null
                             && requestContext.getSecurityContext() instanceof AnonymousSecuritContext) {
