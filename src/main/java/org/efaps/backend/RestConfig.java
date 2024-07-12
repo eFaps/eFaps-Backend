@@ -35,6 +35,7 @@ import org.efaps.backend.listeners.AppEventListener;
 import org.efaps.backend.resources.CheckoutResource;
 import org.efaps.backend.resources.GraphQLResource;
 import org.efaps.backend.resources.HealthResource;
+import org.efaps.backend.resources.ImageResource;
 import org.efaps.backend.resources.VersionResource;
 import org.efaps.db.Context;
 import org.efaps.db.Context.Inheritance;
@@ -92,7 +93,7 @@ public class RestConfig
                                 ContextFilter.class, GeneralExceptionMapper.class,
                                 InvalidSchemaExceptionMapper.class, ConverterProvider.class,
                                 HealthResource.class, VersionResource.class, GraphQLResource.class,
-                                CheckoutResource.class);
+                                CheckoutResource.class, ImageResource.class);
 
                 Context.begin();
                 registerClasses(new EsjpScanner().scan(Path.class, Provider.class));

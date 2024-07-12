@@ -23,8 +23,8 @@ import java.lang.annotation.Target;
 import jakarta.ws.rs.NameBinding;
 
 @NameBinding
-@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE, ElementType.METHOD})
 public @interface Anonymous
 {
 
