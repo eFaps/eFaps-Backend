@@ -36,12 +36,12 @@ public class GeneralExceptionMapper
     @Override
     public Response toResponse(final Throwable throwable)
     {
+        LOG.error("Error 500", throwable);
         if (throwable instanceof WebApplicationException) {
             if (((WebApplicationException) throwable).getResponse() != null) {
                 return ((WebApplicationException) throwable).getResponse();
             }
         }
-        LOG.error("Error 500", throwable);
         return Response.serverError().entity(ErrorDto.builder().withDateTime(OffsetDateTime.now())
                         .withMessage("Check logs").build()).build();
     }

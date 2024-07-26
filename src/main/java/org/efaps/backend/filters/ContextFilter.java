@@ -32,6 +32,7 @@ import jakarta.annotation.Priority;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
 
 @Provider
@@ -56,11 +57,12 @@ public class ContextFilter
                 Context.begin(userUUID, Inheritance.Inheritable);
                 if (Context.getThreadContext().getCompany() == null) {
                     final var companyId = Context.getThreadContext().getPerson().getCompanies().stream().sorted()
-                                    .findFirst().orElseThrow();
+                                    .findFirst().orElseThrow(() -> new RuntimeException("no Company found for user"));
                     Context.getThreadContext().setCompany(Company.get(companyId));
                 }
             } catch (final EFapsException e) {
                 LOG.error("Something went wrong while setting the context", e);
+                requestContext.abortWith(Response.serverError().build());
             }
 
             try {
@@ -91,14 +93,16 @@ public class ContextFilter
                 }
             } catch (final EFapsException e) {
                 LOG.error("Something went wrong while setting the company", e);
+                requestContext.abortWith(Response.serverError().build());
             }
             try {
                 final var company = Context.getThreadContext().getCompany();
                 if (company != null) {
-                    MDC.put("company",  String.format("'%s' (%s)", company.getUUID(), company.getName()));
+                    MDC.put("company", String.format("'%s' (%s)", company.getUUID(), company.getName()));
                 }
             } catch (EFapsException | IllegalArgumentException e) {
                 LOG.error("Something went wrong while setting the companyin the Logger Context", e);
+                requestContext.abortWith(Response.serverError().build());
             }
         }
     }
