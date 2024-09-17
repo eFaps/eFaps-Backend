@@ -26,6 +26,7 @@ import org.efaps.admin.runlevel.RunLevel;
 import org.efaps.backend.converter.ConverterProvider;
 import org.efaps.backend.errors.GeneralExceptionMapper;
 import org.efaps.backend.errors.InvalidSchemaExceptionMapper;
+import org.efaps.backend.features.RequestLogging;
 import org.efaps.backend.filters.AnonymousFilter;
 import org.efaps.backend.filters.AuthenticationFilter;
 import org.efaps.backend.filters.ContextFilter;
@@ -93,7 +94,7 @@ public class RestConfig
                                 ContextFilter.class, GeneralExceptionMapper.class,
                                 InvalidSchemaExceptionMapper.class, ConverterProvider.class,
                                 HealthResource.class, VersionResource.class, GraphQLResource.class,
-                                CheckoutResource.class, ImageResource.class);
+                                CheckoutResource.class, ImageResource.class, RequestLogging.class);
 
                 Context.begin();
                 registerClasses(new EsjpScanner().scan(Path.class, Provider.class));
