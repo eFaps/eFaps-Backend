@@ -20,11 +20,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import org.efaps.admin.EFapsSystemConfiguration;
 import org.efaps.admin.user.Company;
 import org.efaps.admin.user.JAASSystem;
 import org.efaps.admin.user.Person;
 import org.efaps.backend.injection.NoContext;
-import org.efaps.esjp.admin.common.systemconfiguration.KernelConfigurations;
 import org.efaps.util.EFapsException;
 import org.efaps.util.UUIDUtil;
 import org.slf4j.Logger;
@@ -48,6 +48,8 @@ public class FirstTimeUser
     private static final Logger LOG = LoggerFactory.getLogger(FirstTimeUser.class);
     private static final String PREFERRED = "preferred_username";
     private static final String COMPANIES = "eFapsCompanies";
+    private static final String PERMITCREATEPERSON = "org.efaps.kernel.sso.PermitCreatePerson";
+    private static final String PERMITCOMPANYUPDATE = "org.efaps.kernel.sso.PermitCompanyUpdate";
 
     @GET
     public Response registUser(@Context final Application app,
@@ -93,8 +95,8 @@ public class FirstTimeUser
         boolean ret = false;
         if (person != null) {
             ret = true;
-        } else if (KernelConfigurations.SSO_PERMITCREATEPERSON.get()) {
-            LOG.info("{} is activated", KernelConfigurations.SSO_PERMITCREATEPERSON.getKey());
+        } else if (EFapsSystemConfiguration.get().getAttributeValueAsBoolean(PERMITCREATEPERSON)) {
+            LOG.info("{} is activated", PERMITCREATEPERSON);
             final String userName = UUIDUtil.isUUID(jwtClaimsSet.getSubject())
                             ? jwtClaimsSet.getStringClaim(PREFERRED)
                             : jwtClaimsSet.getSubject();
@@ -110,8 +112,8 @@ public class FirstTimeUser
         throws EFapsException, ParseException
     {
         LOG.trace("Steping into syncCompanies");
-        if (KernelConfigurations.SSO_PERMITCOMPANYUPDATE.get()) {
-            LOG.info("{} is activated", KernelConfigurations.SSO_PERMITCOMPANYUPDATE.getKey());
+        if (EFapsSystemConfiguration.get().getAttributeValueAsBoolean(PERMITCOMPANYUPDATE)) {
+            LOG.info("{} is activated", PERMITCOMPANYUPDATE);
 
             final var companyList = jwtClaimsSet.getStringListClaim(COMPANIES);
 
