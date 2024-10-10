@@ -18,6 +18,7 @@ package org.efaps.backend.filters;
 import java.io.IOException;
 import java.util.UUID;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.efaps.admin.user.Company;
 import org.efaps.db.Context;
@@ -36,7 +37,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
 
 @Provider
-@Priority(Priorities.AUTHENTICATION + 10)
+@Priority(Priorities.AUTHENTICATION + 20)
 public class ContextFilter
     implements ContainerRequestFilter
 {
@@ -49,25 +50,32 @@ public class ContextFilter
     public void filter(final ContainerRequestContext requestContext)
         throws IOException
     {
-        if (requestContext.getSecurityContext() instanceof OidcSecurityContext) {
+        if (requestContext.getSecurityContext() instanceof OidcSecurityContext
+                        && BooleanUtils.isNotTrue((Boolean) requestContext.getProperty(NoContextFilter.PROPERTY_KEY))) {
             LOG.debug("Context starts here");
             final var sc = requestContext.getSecurityContext();
             final var userUUID = sc.getUserPrincipal().getName();
             try {
                 Context.begin(userUUID, Inheritance.Inheritable);
-                if (Context.getThreadContext().getCompany() == null) {
+                if (Context.getThreadContext().getCompany() == null && Context.getThreadContext().getPerson() != null) {
                     final var companyId = Context.getThreadContext().getPerson().getCompanies().stream().sorted()
                                     .findFirst().orElseThrow(() -> new RuntimeException("no Company found for user"));
                     Context.getThreadContext().setCompany(Company.get(companyId));
                 }
             } catch (final EFapsException e) {
-                LOG.error("Something went wrong while setting the context", e);
-                requestContext.abortWith(Response.serverError().build());
+                if (e.getId().equals("Context.NOUSER")) {
+                    LOG.error("No user can be found in the database for: " + userUUID, e);
+                    requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
+                } else {
+                    LOG.error("Something went wrong while setting the context", e);
+                    requestContext.abortWith(Response.serverError().build());
+                }
+                return;
             }
 
             try {
                 final String companyStr = requestContext.getHeaderString(HEADER_KEY);
-                if (StringUtils.isNotEmpty(companyStr)) {
+                if (StringUtils.isNotEmpty(companyStr) && Context.getThreadContext().getPerson() != null) {
                     LOG.debug("Received Header to set company {}", companyStr);
                     Company company = null;
                     if (UUIDUtil.isUUID(companyStr)) {

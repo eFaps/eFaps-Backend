@@ -31,9 +31,11 @@ import org.efaps.backend.filters.AnonymousFilter;
 import org.efaps.backend.filters.AuthenticationFilter;
 import org.efaps.backend.filters.ContextFilter;
 import org.efaps.backend.filters.CorsFilter;
+import org.efaps.backend.filters.NoContextFilter;
 import org.efaps.backend.injection.CoreBinder;
 import org.efaps.backend.listeners.AppEventListener;
 import org.efaps.backend.resources.CheckoutResource;
+import org.efaps.backend.resources.FirstTimeUser;
 import org.efaps.backend.resources.GraphQLResource;
 import org.efaps.backend.resources.HealthResource;
 import org.efaps.backend.resources.ImageResource;
@@ -90,11 +92,11 @@ public class RestConfig
             if (!Context.isThreadActive()) {
                 // backend Resources
                 registerClasses(AppEventListener.class, CorsFilter.class, AnonymousFilter.class,
-                                AuthenticationFilter.class,
+                                AuthenticationFilter.class, NoContextFilter.class,
                                 ContextFilter.class, GeneralExceptionMapper.class,
                                 InvalidSchemaExceptionMapper.class, ConverterProvider.class,
                                 HealthResource.class, VersionResource.class, GraphQLResource.class,
-                                CheckoutResource.class, ImageResource.class, RequestLogging.class);
+                                CheckoutResource.class, ImageResource.class, FirstTimeUser.class, RequestLogging.class);
 
                 Context.begin();
                 registerClasses(new EsjpScanner().scan(Path.class, Provider.class));
