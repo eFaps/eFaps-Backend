@@ -18,6 +18,8 @@ package org.efaps.backend.errors;
 import java.time.OffsetDateTime;
 
 import org.efaps.backend.dto.ErrorDto;
+import org.efaps.db.Context;
+import org.efaps.util.EFapsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +39,13 @@ public class GeneralExceptionMapper
     public Response toResponse(final Throwable throwable)
     {
         LOG.error("Error 500", throwable);
+        if (Context.isThreadActive()) {
+           try {
+            Context.rollback();
+        } catch (final EFapsException e) {
+            LOG.error("Catched", e);
+        }
+        }
         if (throwable instanceof WebApplicationException) {
             if (((WebApplicationException) throwable).getResponse() != null) {
                 return ((WebApplicationException) throwable).getResponse();
