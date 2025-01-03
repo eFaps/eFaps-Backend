@@ -54,7 +54,7 @@ public class ImageResource
         final var cache = getCache();
         final ResponseBuilder response;
         if (key != null && cache.containsKey(key)) {
-            final var file = cache.get(key);
+            final var file = new File(cache.get(key));
             response = Response.ok(file);
             final Tika tika = new Tika();
 
@@ -73,11 +73,11 @@ public class ImageResource
         return response.build();
     }
 
-    private static Cache<String, File> getCache()
+    private static Cache<String, String> getCache()
     {
         if (!InfinispanCache.get().exists(CACHENAME)) {
             InfinispanCache.get().initCache(CACHENAME);
         }
-        return InfinispanCache.get().<String, File>getCache(CACHENAME);
+        return InfinispanCache.get().<String, String>getCache(CACHENAME);
     }
 }
