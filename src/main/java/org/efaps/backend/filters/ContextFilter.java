@@ -57,6 +57,7 @@ public class ContextFilter
             final var userUUID = sc.getUserPrincipal().getName();
             try {
                 Context.begin(userUUID, Inheritance.Inheritable);
+                Context.getThreadContext().setRequestAttribute("REST", true);
                 if (Context.getThreadContext().getCompany() == null && Context.getThreadContext().getPerson() != null) {
                     final var companyId = Context.getThreadContext().getPerson().getCompanies().stream().sorted()
                                     .findFirst().orElseThrow(() -> new RuntimeException("no Company found for user"));
@@ -108,6 +109,7 @@ public class ContextFilter
                 if (company != null) {
                     MDC.put("company", String.format("'%s' (%s)", company.getUUID(), company.getName()));
                 }
+
             } catch (EFapsException | IllegalArgumentException e) {
                 LOG.error("Something went wrong while setting the companyin the Logger Context", e);
                 requestContext.abortWith(Response.serverError().build());
