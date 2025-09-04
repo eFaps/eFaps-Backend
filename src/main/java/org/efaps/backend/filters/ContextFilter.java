@@ -60,7 +60,8 @@ public class ContextFilter
                 Context.getThreadContext().setRequestAttribute("REST", true);
                 if (Context.getThreadContext().getCompany() == null && Context.getThreadContext().getPerson() != null) {
                     final var companyId = Context.getThreadContext().getPerson().getCompanies().stream().sorted()
-                                    .findFirst().orElseThrow(() -> new RuntimeException("no Company found for user"));
+                                    .findFirst()
+                                    .orElseThrow(() -> new RuntimeException("no Company found for user " + userUUID));
                     Context.getThreadContext().setCompany(Company.get(companyId));
                 }
             } catch (final EFapsException e) {
