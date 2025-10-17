@@ -80,6 +80,7 @@ public class AuthenticationFilter
             final var url = new URL(openidConfiguration.getJwksUri());
             this.jwkSource = JWKSourceBuilder.create(url)
                             .cache(true)
+                            .rateLimited(false)
                             .build();
         } catch (final MalformedURLException e) {
             LOG.error("Could not parse jwksUri", e);
