@@ -59,10 +59,14 @@ public class ContextFilter
                 Context.begin(userUUID, Inheritance.Inheritable);
                 Context.getThreadContext().setRequestAttribute("REST", true);
                 if (Context.getThreadContext().getCompany() == null && Context.getThreadContext().getPerson() != null) {
-                    final var companyId = Context.getThreadContext().getPerson().getCompanies().stream().sorted()
-                                    .findFirst()
-                                    .orElseThrow(() -> new RuntimeException("no Company found for user " + userUUID));
-                    Context.getThreadContext().setCompany(Company.get(companyId));
+                    final var companyIdOpt = Context.getThreadContext().getPerson().getCompanies().stream().sorted()
+                                    .findFirst();
+                    if (companyIdOpt.isPresent()) {
+                        Context.getThreadContext().setCompany(Company.get(companyIdOpt.get()));
+                    } else {
+                        LOG.error("No Company found for user: " + userUUID);
+                        requestContext.abortWith(Response.status(Response.Status.NOT_ACCEPTABLE).build());
+                    }
                 }
             } catch (final EFapsException e) {
                 if (e.getId().equals("Context.NOUSER")) {
