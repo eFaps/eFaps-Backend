@@ -64,7 +64,7 @@ public class ContextFilter
                     if (companyIdOpt.isPresent()) {
                         Context.getThreadContext().setCompany(Company.get(companyIdOpt.get()));
                     } else {
-                        LOG.error("No Company found for user: " + userUUID);
+                        LOG.warn("No Company found for user: " + userUUID);
                         requestContext.abortWith(Response.status(Response.Status.NOT_ACCEPTABLE).build());
                     }
                 }
