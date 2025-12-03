@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.net.URI;
 
 import org.eclipse.microprofile.config.ConfigProvider;
-import org.efaps.backend.cluster.GroupCommunication;
+import org.efaps.cluster.ClusterCommunication;
 import org.efaps.db.Context;
 import org.efaps.db.Context.Inheritance;
 import org.efaps.util.EFapsException;
@@ -41,7 +41,7 @@ public class Main
 
         final var config = ConfigProvider.getConfig();
         final ResourceConfig restConfig = new RestConfig(config);
-        new GroupCommunication().init(config);
+        ClusterCommunication.initialize();
 
         final URI baseUri = config.getValue("server.url", URI.class);
         LOG.info("Starting server at: {}", baseUri);
