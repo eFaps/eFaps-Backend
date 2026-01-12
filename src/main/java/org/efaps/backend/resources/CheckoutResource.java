@@ -18,11 +18,17 @@ package org.efaps.backend.resources;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.apache.tika.Tika;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.efaps.db.Checkout;
 import org.efaps.db.Instance;
 import org.efaps.util.EFapsException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -37,6 +43,23 @@ import jakarta.ws.rs.core.Response.Status;
 public class CheckoutResource
 {
 
+    private static final Logger LOG = LoggerFactory.getLogger(CheckoutResource.class);
+    private URI tmpURI;
+
+    public CheckoutResource()
+    {
+        LOG.info("Trying to read tmpFolder from config 'core.tmpFolder'");
+        final var config = ConfigProvider.getConfig();
+        final var tempFolder = config.getOptionalValue("core.tmpFolder", java.io.File.class);
+        if (tempFolder.isPresent()) {
+            LOG.info("found config for tempFolder: {}", tempFolder);
+            this.tmpURI = tempFolder.get().toURI();
+        } else {
+            LOG.info("no config found");
+            this.tmpURI = null;
+        }
+    }
+
     @GET
     @Produces({ MediaType.APPLICATION_OCTET_STREAM, MediaType.APPLICATION_JSON })
     public Response checkout(@QueryParam("oid") final String oid)
@@ -44,7 +67,13 @@ public class CheckoutResource
     {
         final Instance instance = Instance.get(oid);
         final Checkout checkout = new Checkout(instance);
-        final var file = File.createTempFile("Checkout", "");
+        final File file;
+        if (this.tmpURI == null) {
+            file = File.createTempFile("Checkout", "");
+        } else {
+            file = Files.createTempFile(Paths.get(this.tmpURI), "Checkout", "").toFile();
+        }
+
         final var output = new FileOutputStream(file);
         try {
             checkout.execute(output);
