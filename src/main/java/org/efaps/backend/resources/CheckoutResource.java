@@ -44,21 +44,8 @@ public class CheckoutResource
 {
 
     private static final Logger LOG = LoggerFactory.getLogger(CheckoutResource.class);
-    private URI tmpURI;
-
-    public CheckoutResource()
-    {
-        LOG.info("Trying to read tmpFolder from config 'core.tmpFolder'");
-        final var config = ConfigProvider.getConfig();
-        final var tempFolder = config.getOptionalValue("core.tmpFolder", java.io.File.class);
-        if (tempFolder.isPresent()) {
-            LOG.info("found config for tempFolder: {}", tempFolder);
-            this.tmpURI = tempFolder.get().toURI();
-        } else {
-            LOG.info("no config found");
-            this.tmpURI = null;
-        }
-    }
+    private static URI TMPURI;
+    private static boolean CHECKED;
 
     @GET
     @Produces({ MediaType.APPLICATION_OCTET_STREAM, MediaType.APPLICATION_JSON })
@@ -68,10 +55,10 @@ public class CheckoutResource
         final Instance instance = Instance.get(oid);
         final Checkout checkout = new Checkout(instance);
         final File file;
-        if (this.tmpURI == null) {
+        if (getTmpURI() == null) {
             file = File.createTempFile("Checkout", "");
         } else {
-            file = Files.createTempFile(Paths.get(this.tmpURI), "Checkout", "").toFile();
+            file = Files.createTempFile(Paths.get(getTmpURI()), "Checkout", "").toFile();
         }
 
         final var output = new FileOutputStream(file);
@@ -88,5 +75,22 @@ public class CheckoutResource
         response.header("Content-Disposition", "attachment; filename=\"" + checkout.getFileName() + "\"");
         response.header("Content-Length", checkout.getFileLength());
         return response.build();
+    }
+
+    private URI getTmpURI()
+    {
+        if (TMPURI == null && !CHECKED) {
+            final var config = ConfigProvider.getConfig();
+            final var tempFolder = config.getOptionalValue("core.tmpFolder", java.io.File.class);
+            if (tempFolder.isPresent()) {
+                LOG.info("found config for tempFolder: {}", tempFolder);
+                TMPURI = tempFolder.get().toURI();
+            } else {
+                LOG.info("no config found");
+                TMPURI = null;
+            }
+            CHECKED = true;
+        }
+        return TMPURI;
     }
 }
