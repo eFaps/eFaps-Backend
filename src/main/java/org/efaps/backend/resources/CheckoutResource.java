@@ -16,6 +16,7 @@
 package org.efaps.backend.resources;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -34,10 +35,13 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.container.AsyncResponse;
+import jakarta.ws.rs.container.Suspended;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.StreamingOutput;
 
 @Path("checkout")
 public class CheckoutResource
@@ -49,7 +53,8 @@ public class CheckoutResource
 
     @GET
     @Produces({ MediaType.APPLICATION_OCTET_STREAM, MediaType.APPLICATION_JSON })
-    public Response checkout(@QueryParam("oid") final String oid)
+    public void checkout(@QueryParam("oid") final String oid,
+                         @Suspended final AsyncResponse asyncResponse)
         throws IOException, EFapsException
     {
         final Instance instance = Instance.get(oid);
@@ -60,21 +65,30 @@ public class CheckoutResource
         } else {
             file = Files.createTempFile(Paths.get(getTmpURI()), "Checkout", "").toFile();
         }
-
-        final var output = new FileOutputStream(file);
+        final var fileOutput = new FileOutputStream(file);
         try {
-            checkout.execute(output);
+            checkout.execute(fileOutput);
         } catch (final EFapsException e) {
-            return Response.status(Status.NOT_FOUND).build();
+            asyncResponse.resume(Response.ok(Status.NOT_FOUND).build());
         }
-        final ResponseBuilder response = Response.ok(file);
-        final Tika tika = new Tika();
-        final String mimeType = tika.detect(file);
-        response.header("Access-Control-Expose-Headers", "*");
-        response.header("Content-Type", mimeType);
-        response.header("Content-Disposition", "attachment; filename=\"" + checkout.getFileName() + "\"");
-        response.header("Content-Length", checkout.getFileLength());
-        return response.build();
+        final String mimeType = new Tika().detect(file);
+        new Thread(() -> {
+            final StreamingOutput fileStream = output -> {
+                try (var in = new FileInputStream(file)) {
+                    final byte[] buffer = new byte[8192];
+                    int bytesRead;
+                    while ((bytesRead = in.read(buffer)) != -1) {
+                        output.write(buffer, 0, bytesRead);
+                    }
+                }
+            };
+            final ResponseBuilder response = Response.ok(fileStream);
+            response.header("Access-Control-Expose-Headers", "*");
+            response.header("Content-Type", mimeType);
+            response.header("Content-Disposition", "attachment; filename=\"" + checkout.getFileName() + "\"");
+            response.header("Content-Length", checkout.getFileLength());
+            asyncResponse.resume(Response.ok(fileStream).build());
+        }).start();
     }
 
     private URI getTmpURI()
