@@ -25,6 +25,7 @@ import java.nio.file.Paths;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.tika.Tika;
@@ -90,6 +91,9 @@ public class CheckoutResource
             asyncResponse.resume(Response.ok(Status.NOT_FOUND).build());
         }
 
+        final var fileLength = checkout.getFileLength();
+        final var fileName = checkout.getFileName();
+
         if (org.efaps.db.Context.isThreadActive()) {
             LOG.debug("Context stoped after checkout completed");
             org.efaps.db.Context.commit();
@@ -97,14 +101,14 @@ public class CheckoutResource
 
         asyncResponse.register((CompletionCallback) throwable -> {
             stopWatch.stop();
-            LOG.info("Checkout with {} finished in {}", uriInfo.getQueryParameters(true),
-                            stopWatch.formatTime());
+            LOG.info("Checkout with {} for '{}' - {} finished in {}", uriInfo.getQueryParameters(true),
+                            fileName, FileUtils.byteCountToDisplaySize(fileLength), stopWatch.formatTime());
             if (file.exists()) {
                 file.delete();
             }
         });
 
-        final String mimeType = new Tika().detect(file);
+        final var mimeType = new Tika().detect(file);
 
         EXECSERVICE.execute(() -> {
             final StreamingOutput fileStream = output -> {
@@ -119,8 +123,8 @@ public class CheckoutResource
             final ResponseBuilder response = Response.ok(fileStream);
             response.header("Access-Control-Expose-Headers", "*");
             response.header("Content-Type", mimeType);
-            response.header("Content-Disposition", "attachment; filename=\"" + checkout.getFileName() + "\"");
-            response.header("Content-Length", checkout.getFileLength());
+            response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+            response.header("Content-Length", fileLength);
             asyncResponse.resume(response.build());
         });
     }
