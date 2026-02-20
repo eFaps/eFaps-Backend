@@ -116,7 +116,7 @@ public class CheckoutResource
             response.header("Content-Type", mimeType);
             response.header("Content-Disposition", "attachment; filename=\"" + checkout.getFileName() + "\"");
             response.header("Content-Length", checkout.getFileLength());
-            asyncResponse.resume(Response.ok(fileStream).build());
+            asyncResponse.resume(response.build());
         });
     }
 
