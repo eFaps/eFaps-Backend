@@ -90,6 +90,11 @@ public class CheckoutResource
             asyncResponse.resume(Response.ok(Status.NOT_FOUND).build());
         }
 
+        if (org.efaps.db.Context.isThreadActive()) {
+            LOG.debug("Context stoped after checkout completed");
+            org.efaps.db.Context.commit();
+        }
+
         asyncResponse.register((CompletionCallback) throwable -> {
             stopWatch.stop();
             LOG.info("Checkout with {} finished in {}", uriInfo.getQueryParameters(true),
