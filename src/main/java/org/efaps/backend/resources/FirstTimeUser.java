@@ -52,6 +52,7 @@ public class FirstTimeUser
     private static final String PERMITCOMPANYUPDATE = "org.efaps.kernel.sso.PermitCompanyUpdate";
 
     @GET
+    @NoContext
     public Response registUser(@Context final Application app,
                                @Context final HttpHeaders headers)
         throws EFapsException
@@ -91,7 +92,8 @@ public class FirstTimeUser
         throws EFapsException, ParseException
     {
         LOG.trace("Steping into validatePerson");
-        final Person person = getPerson(jwtClaimsSet.getSubject());
+        final var subject = jwtClaimsSet.getSubject();
+        final Person person = getPerson(subject);
         boolean ret = false;
         if (person != null) {
             ret = true;
@@ -104,6 +106,8 @@ public class FirstTimeUser
                             UUIDUtil.isUUID(jwtClaimsSet.getSubject()) ? jwtClaimsSet.getSubject() : null, true);
             ret = true;
             LOG.info("created Person: {}", person);
+        } else {
+            LOG.warn("Creation of Person is not Permitted for: {}", subject);
         }
         return ret;
     }
@@ -141,14 +145,14 @@ public class FirstTimeUser
         }
     }
 
-    private Person getPerson(final String _userName)
+    private Person getPerson(final String userName)
         throws EFapsException
     {
         final Person person;
-        if (UUIDUtil.isUUID(_userName)) {
-            person = Person.get(UUID.fromString(_userName));
+        if (UUIDUtil.isUUID(userName)) {
+            person = Person.get(UUID.fromString(userName));
         } else {
-            person = Person.get(_userName);
+            person = Person.get(userName);
         }
         return person;
     }
