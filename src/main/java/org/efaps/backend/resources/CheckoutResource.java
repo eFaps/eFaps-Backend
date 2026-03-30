@@ -88,7 +88,7 @@ public class CheckoutResource
         try {
             checkout.execute(fileOutput);
         } catch (final EFapsException e) {
-            asyncResponse.resume(Response.ok(Status.NOT_FOUND).build());
+            asyncResponse.resume(Response.status(Status.NOT_FOUND).build());
         }
 
         final var fileLength = checkout.getFileLength();
