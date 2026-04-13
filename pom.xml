@@ -102,10 +102,13 @@
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-jaxb</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.glassfish.jersey.ext.microprofile</groupId>
             <artifactId>jersey-mp-config</artifactId>
+        </dependency>
+         <dependency>
+            <groupId>org.glassfish.jersey.connectors</groupId>
+            <artifactId>jersey-apache5-connector</artifactId>
         </dependency>
         <!-- be able to read/parse xml responses -->
          <dependency>
@@ -124,8 +127,6 @@
             <artifactId>c3p0</artifactId>
             <version>0.10.1</version>
         </dependency>
-
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -183,9 +184,6 @@
             <version>3.2.3</version>
         </dependency>
 
-        <!-- TEMP STAR -->
-
-        <!-- TEMP END -->
     </dependencies>
 
     <build>
