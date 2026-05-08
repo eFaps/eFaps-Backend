@@ -38,13 +38,12 @@ public class GeneralExceptionMapper
     @Override
     public Response toResponse(final Throwable throwable)
     {
-        LOG.error("General-Exception", throwable);
         if (Context.isThreadActive()) {
-           try {
-            Context.rollback();
-        } catch (final EFapsException e) {
-            LOG.error("Catched", e);
-        }
+            try {
+                Context.rollback();
+            } catch (final EFapsException e) {
+                LOG.error("Catched", e);
+            }
         }
         if (throwable instanceof WebApplicationException) {
             if (((WebApplicationException) throwable).getResponse() != null) {
@@ -53,6 +52,7 @@ public class GeneralExceptionMapper
                 return response;
             }
         }
+        LOG.error("General-Exception", throwable);
         return Response.serverError().entity(ErrorDto.builder().withDateTime(OffsetDateTime.now())
                         .withMessage("Check logs").build()).build();
     }
