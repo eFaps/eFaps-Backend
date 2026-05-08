@@ -38,7 +38,7 @@ public class GeneralExceptionMapper
     @Override
     public Response toResponse(final Throwable throwable)
     {
-        LOG.error("Error 500", throwable);
+        LOG.error("General-Exception", throwable);
         if (Context.isThreadActive()) {
            try {
             Context.rollback();
@@ -48,7 +48,9 @@ public class GeneralExceptionMapper
         }
         if (throwable instanceof WebApplicationException) {
             if (((WebApplicationException) throwable).getResponse() != null) {
-                return ((WebApplicationException) throwable).getResponse();
+                final var response = ((WebApplicationException) throwable).getResponse();
+                LOG.info("General-Exception was WebApplicationException ==> return {}", response.getStatusInfo());
+                return response;
             }
         }
         return Response.serverError().entity(ErrorDto.builder().withDateTime(OffsetDateTime.now())
