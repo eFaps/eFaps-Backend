@@ -2,22 +2,22 @@
 <!DOCTYPE configuration>
 
 <configuration>
+
     <import class="ch.qos.logback.classic.encoder.PatternLayoutEncoder" />
     <import class="ch.qos.logback.core.ConsoleAppender" />
+    <import class="org.efaps.backend.log.FormattingWrappingAppender" />
 
     <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
         <resetJUL>true</resetJUL>
     </contextListener>
 
-    <appender
-        name="STDOUT"
-        class="ConsoleAppender"
-    >
+ <appender name="STDOUT" class="FormattingWrappingAppender">
+    <wrappedAppender class="ConsoleAppender">
         <encoder class="PatternLayoutEncoder">
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} -%kvp- %msg%n</pattern>
         </encoder>
-    </appender>
-
+    </wrappedAppender>
+</appender>
     <root level="info">
         <appender-ref ref="STDOUT" />
     </root>

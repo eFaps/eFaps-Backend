@@ -145,12 +145,12 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
-            <version>1.4.11</version>
+            <version>1.5.37</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.4.11</version>
+            <version>1.5.37</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.narayana.jta</groupId>
@@ -183,7 +183,6 @@
             <artifactId>tika-core</artifactId>
             <version>3.2.3</version>
         </dependency>
-
     </dependencies>
 
     <build>
