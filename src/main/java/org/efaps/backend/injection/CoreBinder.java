@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.transaction.TransactionManager;
+import jakarta.transaction.TransactionSynchronizationRegistry;
 
 public class CoreBinder
     extends AbstractBinder
@@ -43,6 +44,10 @@ public class CoreBinder
 
             final var transactionManager = Class.forName(config.getValue("backend.transaction.manager", String.class));
             bind(transactionManager).to(TransactionManager.class);
+
+            final var synchronizationRegistry = Class.forName(
+                            config.getValue("backend.transaction.synchronizationRegistry", String.class));
+            bind(synchronizationRegistry).to(TransactionSynchronizationRegistry.class);
 
             bind(config.getValue("backend.transaction.timeout", Integer.class)).to(Integer.class)
                             .named("transactionManagerTimeOut");
