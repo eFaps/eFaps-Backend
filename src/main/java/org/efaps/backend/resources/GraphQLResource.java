@@ -18,7 +18,6 @@ package org.efaps.backend.resources;
 import org.apache.commons.lang3.StringUtils;
 import org.efaps.backend.dto.GraphQLPayloadDto;
 import org.efaps.graphql.EFapsGraphQL;
-import org.efaps.util.EFapsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,14 +41,14 @@ public class GraphQLResource
     public Response get(@QueryParam("query") final String query)
         throws EFapsException
     {
-        LOG.info("GraphQL - GET:", query);
+        LOG.info("GraphQL - GET: {}", query);
         String queryStr;
         if (StringUtils.isEmpty(query)) {
             queryStr = "{ __schema { types { name fields { name } } } }";
         } else {
             queryStr = query;
         }
-        LOG.info(queryStr);
+        LOG.debug(queryStr);
         final var executionResult = new EFapsGraphQL().query(queryStr);
         final var object = executionResult.getData() == null ? executionResult.getErrors()
                         : executionResult.getData();
@@ -62,14 +61,14 @@ public class GraphQLResource
     public Response post(final GraphQLPayloadDto payload)
         throws EFapsException
     {
-        LOG.info("GraphQL - POST:", payload);
+        LOG.info("GraphQL - POST: {}", payload);
         String queryStr;
         if (StringUtils.isEmpty(payload.getQuery())) {
             queryStr = "{ __schema { types { name fields { name } } } }";
         } else {
             queryStr = payload.getQuery();
         }
-        LOG.info(queryStr);
+        LOG.debug(queryStr);
         final var executionResult = new EFapsGraphQL().query(queryStr, payload.getOperationName(),
                         payload.getVariables());
         return Response.ok(executionResult.toSpecification()).build();
