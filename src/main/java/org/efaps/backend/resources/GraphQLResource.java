@@ -18,6 +18,7 @@ package org.efaps.backend.resources;
 import org.apache.commons.lang3.StringUtils;
 import org.efaps.backend.dto.GraphQLPayloadDto;
 import org.efaps.graphql.EFapsGraphQL;
+import org.efaps.util.EFapsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
