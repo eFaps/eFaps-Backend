@@ -28,6 +28,7 @@ import java.util.UUID;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.efaps.admin.AppConfigHandler;
+import org.efaps.admin.program.esjp.EFapsClassLoader;
 import org.efaps.admin.user.Company;
 import org.efaps.backend.errors.InvalidSignatureException;
 import org.efaps.backend.injection.Anonymous;
@@ -101,7 +102,7 @@ public class SignedUploadResource
                 final InputStream is = filePart.getContent();
                 FileUtils.copyInputStreamToFile(is, file);
 
-                final var clazz = Class.forName("org.efaps.esjp.common.file.SignedUrl");
+                final var clazz = EFapsClassLoader.getInstance().findClass("org.efaps.esjp.common.file.SignedUrl");
                 final Object signedUrl = clazz.getDeclaredConstructor().newInstance();
                 final var method = clazz.getMethod("onUpload", File.class, String.class);
                 final var responseObj = method.invoke(signedUrl, file, ref);
