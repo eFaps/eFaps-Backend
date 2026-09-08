@@ -37,6 +37,8 @@ import org.efaps.db.Context.Inheritance;
 import org.efaps.util.EFapsException;
 import org.efaps.util.SignUtil;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import jakarta.ws.rs.POST;
@@ -49,6 +51,7 @@ import jakarta.ws.rs.core.Response;
 @Anonymous
 public class SignedUploadResource
 {
+    private static final Logger LOG = LoggerFactory.getLogger(SignedUploadResource.class);
 
     @POST
     public Response upload(@QueryParam("expires") final long expires,
@@ -85,6 +88,7 @@ public class SignedUploadResource
             Context.getThreadContext().setCompany(company);
             MDC.put("company", String.format("'%s' (%s)", company.getUUID(), company.getName()));
         } catch (final EFapsException e) {
+            LOG.error("Catched", e);
             throw new InvalidSignatureException("Invalid Context");
         }
         try {
@@ -108,6 +112,7 @@ public class SignedUploadResource
         } catch (final EFapsException | IOException | ClassNotFoundException | InstantiationException
                         | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                         | NoSuchMethodException | SecurityException e) {
+            LOG.error("Catched", e);
             throw new InvalidSignatureException("Invalid Context");
         }
         return response;
