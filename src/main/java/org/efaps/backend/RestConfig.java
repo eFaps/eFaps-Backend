@@ -26,6 +26,7 @@ import org.efaps.admin.runlevel.RunLevel;
 import org.efaps.backend.converter.ConverterProvider;
 import org.efaps.backend.errors.GeneralExceptionMapper;
 import org.efaps.backend.errors.InvalidSchemaExceptionMapper;
+import org.efaps.backend.errors.InvalidSignatureExceptionMapper;
 import org.efaps.backend.features.RequestLogging;
 import org.efaps.backend.filters.AnonymousFilter;
 import org.efaps.backend.filters.AuthenticationFilter;
@@ -39,6 +40,7 @@ import org.efaps.backend.resources.FirstTimeUser;
 import org.efaps.backend.resources.GraphQLResource;
 import org.efaps.backend.resources.HealthResource;
 import org.efaps.backend.resources.ImageResource;
+import org.efaps.backend.resources.SignedUploadResource;
 import org.efaps.backend.resources.VersionResource;
 import org.efaps.db.Context;
 import org.efaps.db.Context.Inheritance;
@@ -96,7 +98,9 @@ public class RestConfig
                                 ContextFilter.class, GeneralExceptionMapper.class,
                                 InvalidSchemaExceptionMapper.class, ConverterProvider.class,
                                 HealthResource.class, VersionResource.class, GraphQLResource.class,
-                                CheckoutResource.class, ImageResource.class, FirstTimeUser.class, RequestLogging.class);
+                                CheckoutResource.class, ImageResource.class, FirstTimeUser.class,
+                                RequestLogging.class, SignedUploadResource.class,
+                                InvalidSignatureExceptionMapper.class);
 
                 Context.begin();
                 registerClasses(new EsjpScanner().scan(Path.class, Provider.class));
