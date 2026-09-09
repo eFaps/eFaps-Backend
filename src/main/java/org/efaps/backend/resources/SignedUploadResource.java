@@ -102,7 +102,8 @@ public class SignedUploadResource
                 final InputStream is = filePart.getContent();
                 FileUtils.copyInputStreamToFile(is, file);
 
-                final var clazz = EFapsClassLoader.getInstance().findClass("org.efaps.esjp.common.file.SignedUrl");
+                final var clazz = Class.forName("org.efaps.esjp.common.file.SignedUrl", false,
+                                EFapsClassLoader.getInstance());
                 final Object signedUrl = clazz.getDeclaredConstructor().newInstance();
                 final var method = clazz.getMethod("onUpload", File.class, String.class);
                 final var responseObj = method.invoke(signedUrl, file, ref);
