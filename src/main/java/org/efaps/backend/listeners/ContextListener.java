@@ -33,11 +33,28 @@ public class ContextListener
     {
         LOG.trace("event {}", event.getType());
         switch (event.getType()) {
+            case RESOURCE_METHOD_FINISHED:
+                try {
+                    if (Context.isThreadActive()) {
+                        if (!Context.isTMMarkedRollback()) {
+                            LOG.debug("Context save on RESOURCE_METHOD_FINISHED");
+                            Context.save();
+                        }
+                    }
+                } catch (final EFapsException e) {
+                    LOG.error("FINISHED threw", e);
+                }
+                break;
             case FINISHED:
                 try {
                     if (Context.isThreadActive()) {
-                        LOG.debug("Context stop");
-                        Context.commit();
+                        if (Context.isTMMarkedRollback()) {
+                            LOG.debug("Context rollback on FINISHED");
+                            Context.rollback();
+                        } else {
+                            LOG.debug("Context commit on FINISHED");
+                            Context.commit();
+                        }
                     }
                 } catch (final EFapsException e) {
                     LOG.error("FINISHED threw", e);
@@ -46,6 +63,7 @@ public class ContextListener
             case ON_EXCEPTION:
                 try {
                     if (Context.isThreadActive()) {
+                        LOG.debug("Context rollback on ON_EXCEPTION");
                         Context.rollback();
                     }
                 } catch (final EFapsException e) {
