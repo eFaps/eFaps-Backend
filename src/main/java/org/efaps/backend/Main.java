@@ -47,6 +47,8 @@ public class Main
         ClusterCommunication.initialize();
 
         final URI baseUri = config.getValue("server.url", URI.class);
+        final int shutDownTimeout = config.getOptionalValue("server.shutDownTimeout", Integer.class).orElse(30);
+
         LOG.info("Starting server at: {}", baseUri);
         try {
             Context.begin(null, Inheritance.Local);
@@ -54,7 +56,7 @@ public class Main
 
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 LOG.info("Shutting down Grizzly server...");
-                final var future = server.shutdown(30, TimeUnit.SECONDS);
+                final var future = server.shutdown(shutDownTimeout, TimeUnit.SECONDS);
                 future.addCompletionHandler(new EmptyCompletionHandler<>()
                 {
 
