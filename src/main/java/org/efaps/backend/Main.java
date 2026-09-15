@@ -24,6 +24,8 @@ import org.efaps.cluster.ClusterCommunication;
 import org.efaps.db.Context;
 import org.efaps.db.Context.Inheritance;
 import org.efaps.util.EFapsException;
+import org.glassfish.grizzly.EmptyCompletionHandler;
+import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.slf4j.Logger;
@@ -49,11 +51,21 @@ public class Main
         try {
             Context.begin(null, Inheritance.Local);
             final var server = GrizzlyHttpServerFactory.createHttpServer(baseUri, restConfig, false);
+
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 LOG.info("Shutting down Grizzly server...");
-                server.shutdown(30, TimeUnit.SECONDS);
-                LOG.info("Grizzly server stopped.");
+                final var future = server.shutdown(30, TimeUnit.SECONDS);
+                future.addCompletionHandler(new EmptyCompletionHandler<>()
+                {
+
+                    @Override
+                    public void completed(HttpServer server)
+                    {
+                        LOG.info("Grizzly server stopped.");
+                    }
+                });
             }));
+
             server.getServerConfiguration().setName("eFaps-Backend");
             Context.rollback();
             server.start();
