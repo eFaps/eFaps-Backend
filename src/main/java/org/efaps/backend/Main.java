@@ -17,6 +17,7 @@ package org.efaps.backend;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.efaps.cluster.ClusterCommunication;
@@ -48,9 +49,14 @@ public class Main
         try {
             Context.begin(null, Inheritance.Local);
             final var server = GrizzlyHttpServerFactory.createHttpServer(baseUri, restConfig, false);
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                LOG.info("Shutting down Grizzly server...");
+                server.shutdown(30, TimeUnit.SECONDS);
+                LOG.info("Grizzly server stopped.");
+            }));
             server.getServerConfiguration().setName("eFaps-Backend");
             Context.rollback();
-           server.start();
+            server.start();
         } catch (final EFapsException e) {
             LOG.error("Catched", e);
         }
