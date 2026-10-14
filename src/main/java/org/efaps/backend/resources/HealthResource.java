@@ -20,8 +20,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.sql.DataSource;
 
@@ -49,17 +49,18 @@ public class HealthResource
     @Inject
     private DataSource dataSource;
 
-    private final Map<String, Integer> countByUri = new HashMap<>();
+    private final static Map<String, Integer> COUNTBYURI = new ConcurrentHashMap<>();
 
     @GET
     public Response health(@Context ContainerRequestContext context)
         throws EFapsException
     {
         if (!LOG.isDebugEnabled()) {
-            countByUri.merge(context.getUriInfo().getRequestUri().toString(), 1, Integer::sum);
-            if (countByUri.size() % 10 == 0) {
-                LOG.info("Healthcheck summary {}", countByUri);
-                countByUri.clear();
+            final var uri = context.getUriInfo().getRequestUri().toString();
+            COUNTBYURI.merge(uri, 1, Integer::sum);
+            if (COUNTBYURI.get(uri) % 10 == 0) {
+                LOG.info("Healthcheck summary {}", COUNTBYURI);
+                COUNTBYURI.clear();
             }
         } else {
             LOG.debug("Healthcheck from: {}", context.getUriInfo().getRequestUri());
