@@ -15,9 +15,6 @@
  */
 package org.efaps.backend.resources;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -47,6 +44,7 @@ public class HealthResource
     private static final Logger LOG = LoggerFactory.getLogger(HealthResource.class);
 
     @Inject
+    // @Named("readOnly")
     private DataSource dataSource;
 
     private final static Map<String, Integer> COUNTBYURI = new ConcurrentHashMap<>();
@@ -70,41 +68,16 @@ public class HealthResource
             LOG.info("?");
             dataSourceOK = false;
         } else {
-            Connection connection = null;
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
-            try {
-                connection = dataSource.getConnection();
-                stmt = connection.prepareStatement("Select 1");
-                rs = stmt.executeQuery();
+
+            try (var con = dataSource.getConnection();
+                 var stmt = con.prepareStatement("Select 1")) {
+                final var rs = stmt.executeQuery();
                 rs.next();
+                rs.close();
                 dataSourceOK = true;
             } catch (final SQLException e) {
                 LOG.error("[HealthCheck] failed", e);
                 dataSourceOK = false;
-            }  finally {
-                if (connection != null) {
-                    try {
-                        connection.close();
-                    } catch (final Exception e) {
-                        LOG.error("[HealthCheck] Cannot close database connection",
-                                e);
-                    }
-                }
-                if (stmt != null) {
-                    try {
-                        stmt.close();
-                    } catch (final Exception e) {
-                        LOG.error("[HealthCheck] Cannot close statement", e);
-                    }
-                }
-                if (rs != null) {
-                    try {
-                        rs.close();
-                    } catch (final Exception e) {
-                        LOG.error("[HealthCheck] Cannot close result set", e);
-                    }
-                }
             }
         }
         return dataSourceOK ? Response.ok("More or less " + LocalDateTime.now(), MediaType.TEXT_PLAIN).build()
