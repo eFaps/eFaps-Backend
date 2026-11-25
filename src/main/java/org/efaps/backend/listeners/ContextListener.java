@@ -35,7 +35,7 @@ public class ContextListener
         switch (event.getType()) {
             case RESOURCE_METHOD_FINISHED:
                 try {
-                    if (Context.isThreadActive()) {
+                    if (Context.isThreadActive() && Context.isTMActive()) {
                         if (!Context.isTMMarkedRollback()) {
                             LOG.debug("Context save on RESOURCE_METHOD_FINISHED");
                             Context.save();

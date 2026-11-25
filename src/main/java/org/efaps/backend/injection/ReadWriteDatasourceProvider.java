@@ -15,45 +15,45 @@
  */
 package org.efaps.backend.injection;
 
-import javax.sql.DataSource;
+import javax.sql.XADataSource;
 
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.efaps.backend.listeners.ContextListener;
 import org.glassfish.hk2.api.Factory;
-import org.postgresql.ds.PGSimpleDataSource;
+import org.postgresql.xa.PGXADataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DatasourceProvider
-    implements Factory<DataSource>
+public class ReadWriteDatasourceProvider
+    implements Factory<XADataSource>
 {
     private static final Logger LOG = LoggerFactory.getLogger(ContextListener.class);
 
-    private static DataSource DATASOURCE;
+    private static XADataSource DATASOURCE;
 
     private void init()
     {
         if (DATASOURCE == null) {
             LOG.debug("Inititalizing datasource:");
             final var config = ConfigProvider.getConfig();
-            final var ds = new PGSimpleDataSource();
-            ds.setURL(config.getValue("backend.datasource.url", String.class));
-            ds.setUser(config.getValue("backend.datasource.user", String.class));
-            ds.setPassword(config.getValue("backend.datasource.password", String.class));
+            final var ds = new PGXADataSource();
+            ds.setURL(config.getValue("backend.readWriteDs.url", String.class));
+            ds.setUser(config.getValue("backend.readWriteDs.user", String.class));
+            ds.setPassword(config.getValue("backend.readWriteDs.password", String.class));
             LOG.debug("- {}", ds);
             DATASOURCE = ds;
         }
     }
 
     @Override
-    public DataSource provide()
+    public XADataSource provide()
     {
         init();
         return DATASOURCE;
     }
 
     @Override
-    public void dispose(DataSource instance)
+    public void dispose(XADataSource instance)
     {
         // nothing to do here?
     }

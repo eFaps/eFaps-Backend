@@ -17,6 +17,7 @@ package org.efaps.backend.injection;
 
 import javax.jcr.Repository;
 import javax.sql.DataSource;
+import javax.sql.XADataSource;
 
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.efaps.db.databases.AbstractDatabase;
@@ -52,7 +53,8 @@ public class CoreBinder
             bind(config.getValue("backend.transaction.timeout", Integer.class)).to(Integer.class)
                             .named("transactionManagerTimeOut");
 
-            bindFactory(DatasourceProvider.class).to(DataSource.class);
+            bindFactory(ReadWriteDatasourceProvider.class).named("readWrite").to(XADataSource.class);
+            bindFactory(ReadOnlyDatasourceProvider.class).named("readOnly").to(DataSource.class);
             bindFactory(JCRRepositoryProvider.class).to(Repository.class);
         } catch (final ClassNotFoundException e) {
             LOG.error("Catched", e);
